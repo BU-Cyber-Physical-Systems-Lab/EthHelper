@@ -222,7 +222,8 @@ module AXIToStream_wrapper #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TVALID" *)
     output wire                          stream_tvalid,     // Transfer valid (required)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TREADY" *)
-    input wire                         stream_tready      // Transfer ready (optional)
+    input wire                         stream_tready,      // Transfer ready (optional)
+    output wire DBG_can_forward
 );
 
   AXIToStream #(
@@ -343,8 +344,9 @@ module AXIToStream_wrapper #(
       .stream_tready(stream_tready),
       .stream_tstrb(stream_tstrb),
       .stream_tuser(stream_tuser),
-      .stream_tvalid(stream_tvalid)
+      .stream_tvalid(stream_tvalid),
 
+      .DBG_can_forward(DBG_can_forward)
   );
 
 endmodule

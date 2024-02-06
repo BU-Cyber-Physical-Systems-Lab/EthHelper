@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="AXIToStream_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="AXIToStream_tb" />
+            <top_module name="axi4stream_vip_pkg" />
+            <top_module name="axi_vip_pkg" />
+            <top_module name="glbl" />
+            <top_module name="std" />
+            <top_module name="xil_common_vip_pkg" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="115000fs"></ZoomEndTime>
+      <Cursor1Time time="115000fs"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="175"></NameColumnWidth>
+      <ValueColumnWidth column_width="130"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wvobject type="logic" fp_name="/AXIToStream_tb/clk">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/AXIToStream_tb/resetn">
+      <obj_property name="ElementShortName">resetn</obj_property>
+      <obj_property name="ObjectShortName">resetn</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/AXIToStream_tb/DBG_can_forward">
+      <obj_property name="ElementShortName">DBG_can_forward</obj_property>
+      <obj_property name="ObjectShortName">DBG_can_forward</obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/SNOOP_AXI">
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">turquoise</obj_property>
+      <obj_property name="Render_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/SNOOP_AXI.readWriteSummary</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CellHeight">36</obj_property>
+      <obj_property name="ElementShortName">SNOOP_AXI</obj_property>
+      <obj_property name="ObjectShortName">SNOOP_AXI</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/FORWARD_AXI">
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
+      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">turquoise</obj_property>
+      <obj_property name="Render_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/FORWARD_AXI.readWriteSummary</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CellHeight">36</obj_property>
+      <obj_property name="ElementShortName">FORWARD_AXI</obj_property>
+      <obj_property name="ObjectShortName">FORWARD_AXI</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI">
+      <obj_property name="children_use_element_short_name">true</obj_property>
+      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+      <obj_property name="EnumTransactionColorTable">fff,ffffffff=blank</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="CustomSignalColor">#00E600</obj_property>
+      <obj_property name="Render_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI.streamWaveData</obj_property>
+      <obj_property name="Number_Overlay">2</obj_property>
+      <obj_property name="Overlay_Object_0">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI.linkStarve</obj_property>
+      <obj_property name="Overlay_Color_0">#99E600</obj_property>
+      <obj_property name="Overlay_Object_1">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI.linkStall</obj_property>
+      <obj_property name="Overlay_Color_1">#E64C00</obj_property>
+      <obj_property name="Detail_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI.streamTooltipData</obj_property>
+      <obj_property name="ElementShortName">STREAM_AXI</obj_property>
+      <obj_property name="ObjectShortName">STREAM_AXI</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+</wave_config>

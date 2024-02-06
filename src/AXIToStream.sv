@@ -126,7 +126,9 @@ module AXIToStream #(
     output wire                          stream_tlast,
     output wire       [  USER_WIDTH-1:0] stream_tuser,
     output wire                          stream_tvalid,
-    input wire                         stream_tready
+    input wire                         stream_tready,
+    
+    output wire DBG_can_forward
 );
 
  /// The type of the ongoing stream (matches the AXI4 channels).
@@ -138,8 +140,13 @@ module AXIToStream #(
     B
   } _stream_type;
 
-  /// Data to be streamed in to the AXIStream slave.
-  reg [DATA_WIDTH-1:0] _stream_data;
+  /** Data to be streamed in to the AXIStream slave.
+   * In case of RDATA and WDATA streams we need to compose the metadata and 
+   * save the contents of the data line since we do not have any spare bits
+   * in stream_tdata, so we use a tag team of two registers to send the output
+   * save the one we will send next.
+  */
+  reg [DATA_WIDTH-1:0] _stream_data, _stream_data_next;
 
   /** State of the module.
 	 * *NOTE*: Each stream transaction is "tagged" with ::_stream_type so we need
@@ -160,8 +167,9 @@ module AXIToStream #(
 	 * ready signal until the current AXIStream transaction has completed and
 	 * the AXIStream is ready to process another transaction.
 	 */
-  wire can_stream;
-  assign can_stream = stream_tready & (_stream_state == IDLE);
+  wire can_forward;
+  assign can_forward = ~resetn || (stream_tready && (_stream_state == IDLE));
+  assign DBG_can_forward = can_forward;
   reg [DATA_WIDTH/8-1:0] _stream_strobe;
 
   // connect the master to the slave port, so we can forward downstream the signals we received.
@@ -178,7 +186,7 @@ module AXIToStream #(
   assign forward_awqos = snoop_awqos;
   assign forward_awuser = snoop_awuser;
   assign forward_awvalid = snoop_awvalid;
-  assign snoop_awready = forward_awready & can_stream;
+  assign snoop_awready = forward_awready && can_forward;
 
   assign forward_wid = snoop_wid;
   assign forward_wdata = snoop_wdata;
@@ -186,13 +194,13 @@ module AXIToStream #(
   assign forward_wlast = snoop_wlast;
   assign forward_wuser = snoop_wuser;
   assign forward_wvalid = snoop_wvalid;
-  assign snoop_wready = forward_wready & can_stream;
+  assign snoop_wready = forward_wready && can_forward;
 
   assign snoop_bid = forward_bid;
   assign snoop_bresp = forward_bresp;
   assign snoop_buser = forward_buser;
   assign forward_bready = snoop_bready;
-  assign snoop_bvalid = forward_bvalid & can_stream;
+  assign snoop_bvalid = forward_bvalid && can_forward;
 
   assign forward_arid = snoop_arid;
   assign forward_araddr = snoop_araddr;
@@ -206,15 +214,15 @@ module AXIToStream #(
   assign forward_arqos = snoop_arqos;
   assign forward_aruser = snoop_aruser;
   assign forward_arvalid = snoop_arvalid;
-  assign snoop_arready = forward_arready & can_stream;
+  assign snoop_arready = forward_arready && can_forward;
 
   assign snoop_rid = forward_rid;
   assign snoop_rdata = forward_rdata;
   assign snoop_rresp = forward_rresp;
   assign snoop_rlast = forward_rlast;
   assign snoop_ruser = forward_ruser;
-  assign snoop_rvalid = forward_rvalid & can_stream;
-  assign forward_rready = snoop_rready;
+  assign snoop_rvalid = forward_rvalid && can_forward;
+  assign forward_rready = snoop_rready && can_forward;
 
   //build the stream data register
   always @(posedge clk) begin
@@ -222,7 +230,7 @@ module AXIToStream #(
       _stream_state  <= IDLE;
       _stream_strobe <= {DATA_WIDTH / 8{1'b0}};
       _stream_data   <= {DATA_WIDTH{1'b0}};
-    end else if (snoop_arvalid & forward_arready & can_stream) begin
+    end else if (snoop_arvalid && forward_arready && stream_tready) begin
       _stream_data <= {AR, {(DATA_WIDTH - STREAM_TYPE_WIDTH - ADDR_WIDTH) {1'b0}}, snoop_araddr};
       _stream_state <= ADDR;
       _stream_strobe <= {
@@ -230,7 +238,7 @@ module AXIToStream #(
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - ADDR_WIDTH) / 8{1'b0}},
         {ADDR_WIDTH / 8{1'b1}}
       };
-    end else if (snoop_awvalid & forward_awready & can_stream) begin
+    end else if (snoop_awvalid && forward_awready && stream_tready) begin
       _stream_data <= {AW, {DATA_WIDTH - STREAM_TYPE_WIDTH - ADDR_WIDTH{1'b0}}, snoop_awaddr};
       _stream_state <= ADDR;
       _stream_strobe <= {
@@ -238,7 +246,7 @@ module AXIToStream #(
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - ADDR_WIDTH) / 8{1'b0}},
         {ADDR_WIDTH / 8{1'b1}}
       };
-    end else if (snoop_bready & forward_bvalid & can_stream) begin
+    end else if (snoop_bready && forward_bvalid && stream_tready) begin
       _stream_data <= {B, {DATA_WIDTH - STREAM_TYPE_WIDTH - 2{1'b0}}, snoop_bresp};
       _stream_state <= RESP;
       _stream_strobe <= {
@@ -246,29 +254,44 @@ module AXIToStream #(
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - 2) / 8{1'b0}},
         8'b1
       };
-    end else if (snoop_rvalid & forward_rready & can_stream) begin
+    end else if (forward_rvalid && snoop_rready && stream_tready) begin
       _stream_data <= {R, {DATA_WIDTH - STREAM_TYPE_WIDTH{1'b0}}};
+      _stream_data_next <= forward_rdata;
       _stream_state <= RDATA1;
+      _stream_data   <= forward_rdata;
       _stream_strobe <= {
         {(STREAM_TYPE_WIDTH + 7) / 8{1'b1}}, {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7) / 8{1'b0}}
       };
-    end else if (stream_tready & _stream_state == RDATA1) begin
+    end else if (forward_rvalid && snoop_rready && stream_tready && _stream_state == RDATA1) begin
       _stream_state  <= RDATA2;
-      _stream_data   <= snoop_rdata;
+      _stream_data <= _stream_data_next;
+      _stream_data_next <= forward_rdata;
       _stream_strobe <= {DATA_WIDTH{1'b1}};
-    end else if (snoop_rvalid & forward_rready & can_stream) begin
+    end else if (snoop_rready && stream_tready && _stream_state == RDATA2 && forward_rvalid) begin
+      _stream_data <= _stream_data_next;
+      _stream_data_next <= forward_rdata;
+      _stream_strobe <= {DATA_WIDTH/8{1'b1}};
+      _stream_state <= RDATA2;
+    end else if (snoop_wvalid && forward_wready && stream_tready) begin
       _stream_data <= {W, {DATA_WIDTH - (DATA_WIDTH / 8) {1'b0}}, snoop_wstrb};
+      _stream_data_next <= snoop_wdata;
       _stream_state <= WDATA1;
       _stream_strobe <= {
         {(STREAM_TYPE_WIDTH + 7) / 8{1'b1}},
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - DATA_WIDTH / 8) / 8{1'b0}},
         {DATA_WIDTH / 8{1'b1}}
       };
-    end else if (stream_tready & _stream_state == WDATA1) begin
+    end else if (forward_wready && stream_tready && _stream_state == WDATA1 && snoop_wvalid) begin
       _stream_state  <= WDATA2;
-      _stream_data   <= snoop_wdata;
-      _stream_strobe <= {DATA_WIDTH{1'b1}};
-    end else if (_stream_state != IDLE & _stream_state != RDATA1 & _stream_state != WDATA1) begin
+      _stream_data_next   <= snoop_wdata;
+      _stream_data <= _stream_data_next;
+      _stream_strobe <= {DATA_WIDTH/8{1'b1}};
+    end else if (stream_tready && _stream_state == WDATA2 && snoop_wvalid && forward_wready) begin
+      _stream_data <= _stream_data_next;
+      _stream_data_next <= snoop_wdata;
+      _stream_strobe <= {DATA_WIDTH/8{1'b1}};
+      _stream_state <= WDATA2;
+    end else if (_stream_state != IDLE && _stream_state != RDATA1 && _stream_state != WDATA1) begin
       _stream_state  <= IDLE;
       _stream_data   <= 0;
       _stream_strobe <= 0;
@@ -284,7 +307,7 @@ module AXIToStream #(
   assign stream_tdata = _stream_data;
   assign stream_tstrb = _stream_strobe;
   assign stream_tkeep = {DATA_WIDTH / 8{1'b1}};
-  assign stream_tlast = (_stream_state != WDATA1 & _stream_state != RDATA1 & _stream_state != IDLE);
+  assign stream_tlast = (_stream_state != WDATA1 && _stream_state != RDATA1 && _stream_state != IDLE);
   assign stream_tid = 0;
   assign stream_tdest = 0;
   assign stream_tuser = 0;
