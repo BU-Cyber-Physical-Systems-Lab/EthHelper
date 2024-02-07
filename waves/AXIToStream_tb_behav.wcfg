@@ -15,15 +15,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="115000fs"></ZoomEndTime>
-      <Cursor1Time time="115000fs"></Cursor1Time>
+      <ZoomStartTime time="829997fs"></ZoomStartTime>
+      <ZoomEndTime time="1034001fs"></ZoomEndTime>
+      <Cursor1Time time="1000000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="130"></ValueColumnWidth>
+      <ValueColumnWidth column_width="122"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="6" />
+   <WVObjectSize size="7" />
    <wvobject type="logic" fp_name="/AXIToStream_tb/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -35,6 +35,12 @@
    <wvobject type="logic" fp_name="/AXIToStream_tb/DBG_can_forward">
       <obj_property name="ElementShortName">DBG_can_forward</obj_property>
       <obj_property name="ObjectShortName">DBG_can_forward</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/DBG_stream_state">
+      <obj_property name="ElementShortName">DBG_stream_state[3:0]</obj_property>
+      <obj_property name="ObjectShortName">DBG_stream_state[3:0]</obj_property>
+      <obj_property name="CustomSignalColor">#F0E68C</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/SNOOP_AXI">
       <obj_property name="children_use_element_short_name">true</obj_property>
