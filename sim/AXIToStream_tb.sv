@@ -34,9 +34,8 @@ module AXIToStream_tb ();
   //Instantiate the laock design wrapper and connect external pins
   AXIToStream_test_wrapper #() ats_test (
       .aclk_0(clk),
-      .aresetn_0(resetn),
-      .DBG_can_forward_0(DBG_can_forward),
-      .DBG_stream_state_0(DBG_stream_state)
+      .aresetn_0(resetn)
+
   );
 
   // Declare AXI agents
