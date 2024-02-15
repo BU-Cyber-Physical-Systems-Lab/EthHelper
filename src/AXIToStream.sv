@@ -129,7 +129,11 @@ module AXIToStream #(
     input  wire                    stream_tready,
 
     //debug pins
-    output wire [STREAM_TYPE_WIDTH-1:0] DBG_stream_type
+    output wire  DBG_can_forwardAR,
+    output wire  DBG_can_forwardAW,
+    output wire  DBG_can_forwardR,
+    output wire  DBG_can_forwardW,
+    output wire  DBG_can_forwardB
 );
 
   /** The type of the ongoing stream (matches the AXI4 channels).
@@ -142,6 +146,7 @@ module AXIToStream #(
     AR,
     R,
     AW,
+    WSTRB,
     W,
     B
   } _stream_type;
@@ -149,9 +154,10 @@ module AXIToStream #(
   /** This register is used to make sure that we don´t starve neither read or write transactions,
    * by remembering which transaction was streamed during last contentions.
 	 */
-  enum reg {
-    CAR,  // contention, do AR
-    CAW   // contention, do AW
+  enum reg [1:0] {
+    NOC = 0,     //no conflict
+    CAR,    // contention, do AR
+    CAW    // contention, do AW
   } _address_rr;
 
   /** Data to be streamed in to the AXIStream slave.
@@ -171,6 +177,10 @@ module AXIToStream #(
   reg [BURST_LEN+1-1:0] _burst_len;
 
 
+   //reg _data_sent
+   //assign 
+
+
   /** To have meaningful transactions and not lose data we stall the AXI4 slave
 	 * ready signal until the current AXIStream transaction has completed and
 	 * the AXIStream is ready to process another transaction.
@@ -183,7 +193,7 @@ module AXIToStream #(
 	 * - there was a conflict with a write transaction and we stalled the read transaction (`_address_rr == AW`)
 	 */
   wire can_forwardAR;
-  assign can_forwardAR = ~resetn || (stream_tready && _stream_type == NONE && (!snoop_awvalid || _address_rr == CAW));
+  assign can_forwardAR = ~resetn || (stream_tready && _stream_type == NONE && (!snoop_awvalid || _address_rr != CAR));
   /** We accept an AW transaction if:
 	 * - stream module is ready (`stream_tready`)
 	 * - we are not streaming already another transaction (`_stream_type==NONE`)
@@ -191,21 +201,20 @@ module AXIToStream #(
 	 * - there was a conflict with a write transaction and we stalled the read transaction (`_address_rr == AW`)
 	 */
   wire can_forwardAW;
-  assign can_forwardAW = ~resetn || (stream_tready && _stream_type == NONE && (!snoop_arvalid || _address_rr == CAR));
+  assign can_forwardAW = ~resetn || (stream_tready && _stream_type == NONE && (!snoop_arvalid || _address_rr != CAW));
   ///For R/W  we depend on the completion of the previous AR/AW and there can be multiple R/W bursts in the same transaction
   wire can_forwardR, can_forwardW;
   assign can_forwardR = ~resetn || (stream_tready && (_stream_type == AR || _stream_type == R));
-  assign can_forwardW = ~resetn || (stream_tready && (_stream_type == AW || _stream_type == W));
+  assign can_forwardW = ~resetn || (stream_tready && _stream_type == WSTRB );
   /// For B transaction we only depend on the completion of the previous write transaction
   wire can_forwardB;
-  assign can_forwardB = ~resetn || (stream_tready && _stream_type == W);
+  assign can_forwardB = ~resetn || (stream_tready && _stream_type == W && _burst_len ==0);
   assign DBG_can_forwardAR = can_forwardAR;
   assign DBG_can_forwardR = can_forwardR;
   assign DBG_can_forwardAW = can_forwardAW;
   assign DBG_can_forwardW = can_forwardW;
   assign DBG_can_forwardB = can_forwardB;
-  assign DBG_stream_type = _stream_type;
-
+  
   // connect the master to the slave port, so we can forward downstream the signals we received.
   assign forward_awid = snoop_awid;
   assign forward_awaddr = snoop_awaddr;
@@ -213,7 +222,7 @@ module AXIToStream #(
   assign forward_awsize = snoop_awsize;
   assign forward_awburst = snoop_awburst;
   assign forward_awlock = snoop_awlock;
-  assign forawrd_awcache = snoop_awcache;
+  assign forward_awcache = snoop_awcache;
   assign forward_awprot = snoop_awprot;
   assign forward_awregion = snoop_awregion;
   assign forward_awqos = snoop_awqos;
@@ -262,32 +271,46 @@ module AXIToStream #(
   always @(posedge clk) begin
     if (~resetn) begin
       _stream_type <= NONE;
-      _burst_len   <= 0;
-      _address_rr  <= CAR;
+      _address_rr  <= NOC;
+      _burst_len<=0;
       // Ax transaction
-    end else if ((forward_arvalid && snoop_arready) || (forward_awvalid && snoop_awready)) begin
-      _address_rr  <= (forward_arvalid && snoop_arready) ? CAR : CAW;
-      _stream_type <= (forward_arvalid && snoop_arready) ? AR : AW;
-      // arlen value + 1st burst transaction (manual) + metadata
-      _burst_len   <= ((forward_arvalid && snoop_arready) ? snoop_arlen : snoop_awlen) + 1 + 1;
-      // R/W transaction
-    end else if ((forward_rready && snoop_rvalid) || (forward_wready && snoop_wvalid)) begin
-      _stream_type <= (forward_rready && snoop_rvalid) ? R : W;
-      _burst_len   <= _burst_len - 1;
-      _address_rr  <= _address_rr;
-      // B transaction
-    end else if (forward_bvalid && snoop_bready) begin
-      _stream_type <= B;
-      _burst_len   <= 0;
-      _address_rr  <= _address_rr;
-    end else if (_burst_len == 0) begin
-      _stream_type <= (_stream_type == R || _stream_type == B) ? NONE : _stream_type;
-      _burst_len   <= 0;
-    end else begin
-      _stream_type <= _stream_type;
-      _burst_len   <= _burst_len;
-      _address_rr  <= _address_rr;
-    end
+    end else if ((snoop_arvalid && forward_arready && can_forwardAR) || (snoop_awvalid && forward_awready && can_forwardAW)) begin
+        if((snoop_arvalid && forward_arready) && (snoop_awvalid && forward_awready) && _address_rr==NOC) //no conflict initially but then contention
+            _address_rr  <= (snoop_arvalid && forward_arready) ? CAR : CAW;//preference towards read going first
+        else begin
+            _address_rr <= NOC;
+        end
+          _stream_type <= (snoop_arvalid && forward_arready) ? AR : AW;
+          // arlen value + 1st burst transaction (manual specification) + metadata
+          _burst_len   <= ((snoop_arvalid && forward_arready) ? snoop_arlen : snoop_awlen)+1+1;
+          // R transaction
+        end else if ((_stream_type==AR || _stream_type==R && can_forwardR) && ((snoop_rready && forward_rvalid)  || _burst_len == 1 )) begin
+          _stream_type <= R;
+          _address_rr  <= _address_rr;
+          // we do not decrement the burst length if we are streaming AR
+          _burst_len <= (_stream_type==AR)? _burst_len : _burst_len-1;
+          // W transaction, here we grab the metadata and send it
+        end else if (snoop_wready && forward_wvalid && can_forwardW && (_stream_type==AW || _stream_type ==W)) begin
+         _stream_type<=WSTRB;
+         _address_rr <=_address_rr;
+         _burst_len <= _burst_len;
+         // W transaction, send the actual data and prepare meteadata for next W burst
+         end else if (( snoop_wready && forward_wvalid && can_forwardW) || (_burst_len == 1 && can_forwardW)) begin
+         _stream_type <=W;
+         _address_rr <= _address_rr;
+         _burst_len <= _burst_len-1;      
+        end else if (snoop_bready && forward_bvalid && can_forwardB) begin
+          _stream_type <= B;
+          _burst_len   <= 0;
+          _address_rr  <= _address_rr;
+        end else if (_burst_len == 0 && stream_tready && (_stream_type == R || _stream_type == B)) begin
+          _stream_type <= (_stream_type == R || _stream_type == B) ? NONE : _stream_type;
+          _burst_len   <= 0;
+        end else begin
+          _stream_type <= _stream_type;
+          _burst_len   <= _burst_len;
+          _address_rr  <= _address_rr;
+        end
   end
 
 
@@ -300,34 +323,30 @@ module AXIToStream #(
       _stream_strobe <= 0;
       _stream_data <= 0;
       _stream_data_next <= 0;
-      _stream_type <= NONE;
-      _burst_len <= 0;
       
     end
     // we are completing a single burst transaction, so we will go idle next clock
-    else if (_burst_len==0 && _stream_type==NONE) begin
+//    else if (((snoop_rready && _stream_type == R) || ( forward_wready && _stream_type == W)) && _burst_len==1) begin
       
-      _stream_data <= 0;
-      _stream_data_next <= 0;
-      _stream_strobe <= 0;
-      // we are waiting for one interface
-    end
+//      _stream_data <= _stream_data_next;
+//      _stream_data_next <= {DATA_WIDTH - 1{1'b0}};
+//      _stream_strobe <= {DATA_WIDTH / 8{1'b1}};
+//      // we are waiting for one interface
+//    end
     //last element of R and W
-    else if (_burst_len==0 && _stream_type!=NONE) begin
-      
-      _stream_data <= _stream_data_next;
-      _stream_data_next <= {DATA_WIDTH - 1{1'b0}};
-      _stream_strobe <= {DATA_WIDTH / 8{1'b1}};
-      // we are waiting for one interface
-    end
+    //questioning validity of below
+    //barely makes it
+    else if (_burst_len == 0 && stream_tready && (_stream_type == R || _stream_type == W)) begin
+         _stream_data<=_stream_data_next;
+         _stream_data_next<=0;
+    end 
     /* transaction on the AR channel, pack the address with metadata and stream it
     *   stream what transaction is happening then pad with 0 then add the address
     *   burst lenght always has to be stated?
     */
-    else if (snoop_arvalid && forward_arready) begin
+    else if (snoop_arvalid && forward_arready && can_forwardAR) begin
       _stream_data <= {AR, {(DATA_WIDTH - STREAM_TYPE_WIDTH - ADDR_WIDTH) {1'b0}}, snoop_araddr};
-      _stream_data_next <= 0;
- 
+      _stream_data_next <= {R, {(DATA_WIDTH - STREAM_TYPE_WIDTH) {1'b0}}};
       _stream_strobe <= {
         {(STREAM_TYPE_WIDTH + 7) / 8{1'b1}},
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - ADDR_WIDTH) / 8{1'b0}},
@@ -339,7 +358,7 @@ module AXIToStream #(
     *   stream what transaction is happening then pad with 0 then add the address
     *
     */
-    else if (snoop_awvalid && forward_awready) begin
+    else if (snoop_awvalid && forward_awready && can_forwardAW) begin
       _stream_data <= {AW, {DATA_WIDTH - STREAM_TYPE_WIDTH - ADDR_WIDTH{1'b0}}, snoop_awaddr};
      
       _stream_strobe <= {
@@ -354,7 +373,7 @@ module AXIToStream #(
     *   stream what transaction is happening then pad with 0 then add the address
     *
     */
-    else if (snoop_bready && forward_bvalid ) begin
+    else if (snoop_bready && forward_bvalid && can_forwardB) begin
       _stream_data <= {B, {DATA_WIDTH - STREAM_TYPE_WIDTH - 2{1'b0}}, snoop_bresp};
       
       _stream_strobe <= {
@@ -364,21 +383,20 @@ module AXIToStream #(
       };
       // 
     end 
-    /* 1st burst element of a transaction in the R channel, send the metadata and store the data incoming
+    /* 1st burst element of a transaction in the R channel, send the metadata created in the AR state and stored the data register
     * i.e. send metadata first, save the incoming data, then next clock cycle send the actual data
     *  NEEDS TO CHECK IF IT IS THE FIRST TIME GETTING R TRANSACTION
     */
-    else if (forward_rvalid && snoop_rready && _stream_type==AR) begin
-      _stream_data <= {R, {DATA_WIDTH - STREAM_TYPE_WIDTH{1'b0}}};
-     
+    else if (snoop_rready &&  forward_rvalid && can_forwardR && _stream_type==AR) begin
+     _stream_data <= _stream_data_next;
       _stream_data_next <= forward_rdata;
       _stream_strobe <= {
         {(STREAM_TYPE_WIDTH + 7) / 8{1'b1}}, {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7) / 8{1'b0}}
       };
-      // R transaction, from 2nd element of the burst
+      // R transaction, from after sending the metadata
       // send the previous data burst and store the next
     end 
-    else if (forward_rvalid && snoop_rready && _stream_type==R) begin
+    else if (forward_rready &&  snoop_rvalid && can_forwardR && _stream_type==R) begin
       // the next state depends on forward_rlast
       
       _stream_data <= _stream_data_next;
@@ -386,15 +404,15 @@ module AXIToStream #(
       _stream_strobe <= {DATA_WIDTH{1'b1}};
       // last element of a burst transaction on the R channel
     end
-    //***something is supsicious about this conditional*** 
-    else if (snoop_rready &&  forward_rvalid && forward_rlast) begin
-      _stream_data <= _stream_data_next;
-      _stream_data_next <= {DATA_WIDTH - 1{1'b0}};
-      _stream_strobe <= {DATA_WIDTH / 8{1'b1}};
-      
-      // 1st burst element of a transaction in the W channel, send the metadata and store the data
-    end 
-    else if (snoop_wvalid && forward_wready && _stream_type==AW) begin
+//    //***something is supsicious about this conditional*** 
+//    else if (forward_rready &&  snoop_rvalid && forward_rlast) begin
+//      _stream_data <= _stream_data_next;
+//      _stream_data_next <= {DATA_WIDTH - 1{1'b0}};
+//      _stream_strobe <= {DATA_WIDTH / 8{1'b1}};
+//      end
+//      // Burst element of a transaction in the W channel, send the metadata and store the data
+    else if (forward_wready && snoop_wvalid && (_stream_type==AW ||_stream_type == W)) begin
+   
       _stream_data <= {W, {DATA_WIDTH - (DATA_WIDTH / 8) {1'b0}}, snoop_wstrb};
       _stream_data_next <= snoop_wdata;
       
@@ -403,19 +421,18 @@ module AXIToStream #(
         {(DATA_WIDTH - STREAM_TYPE_WIDTH + 7 - DATA_WIDTH / 8) / 8{1'b0}},
         {DATA_WIDTH / 8{1'b1}}
       };
-      // W transaction, from 2nd element of the burst
-      // send the previous data burst and store the next
+      // W transaction, from after we sent the strobe
+      // send the previous data
     end 
-    else if (snoop_wvalid && forward_wready && _stream_type==W) begin
+    else if (can_forwardW) begin
       // the next state depends on forward_rlast
       
-      _stream_data_next <= snoop_wdata;
+      _stream_data_next <=0; // only to avoid latching
       _stream_data <= _stream_data_next;
       _stream_strobe <= {DATA_WIDTH / 8{1'b1}};
       // last element of a burst transaction on the W channel
     end 
     else begin
-      
       _stream_data <= _stream_data;
       _stream_data_next <= _stream_data_next;
       _stream_strobe <= _stream_strobe;
@@ -435,7 +452,7 @@ module AXIToStream #(
 
 
   // connect remaining AXI stream cables
-  assign stream_tvalid = can_forwardAR || can_forwardR || can_forwardAW || can_forwardW || can_forwardB;
+  assign stream_tvalid = (can_forwardAR || can_forwardR || can_forwardAW || can_forwardW || can_forwardB) && _stream_type!=NONE;
   assign stream_tdata = _stream_data;
   assign stream_tstrb = _stream_strobe;
   assign stream_tkeep = {DATA_WIDTH / 8{1'b1}};

@@ -224,7 +224,11 @@ module AXIToStream_wrapper #(
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TREADY" *)
     input  wire                    stream_tready,     // Transfer ready (optional)
 
-    output wire [STREAM_TYPE_WIDTH-1:0] DBG_stream_type
+    output wire DBG_can_forwardAR,
+    output wire DBG_can_forwardAW,
+    output wire DBG_can_forwardR,
+    output wire DBG_can_forwardW,
+    output wire DBG_can_forwardB
 );
 
   AXIToStream #(
@@ -348,7 +352,11 @@ module AXIToStream_wrapper #(
       .stream_tvalid(stream_tvalid),
 
 
-      .DBG_stream_type(DBG_stream_type)
+      .DBG_can_forwardAR(DBG_can_forwardAR),
+      .DBG_can_forwardAW(DBG_can_forwardAW),
+      .DBG_can_forwardR(DBG_can_forwardR),
+      .DBG_can_forwardW(DBG_can_forwardW),
+      .DBG_can_forwardB(DBG_can_forwardB)
   );
 
 endmodule

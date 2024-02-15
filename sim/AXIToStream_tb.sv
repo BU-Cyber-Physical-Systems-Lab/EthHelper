@@ -28,8 +28,6 @@ import AXIToStream_test_axi_vip_1_0_pkg::*;
 module AXIToStream_tb ();
 
   bit clk, resetn;
-  wire DBG_can_forward;
-  wire [3:0] DBG_stream_state;
 
   //Instantiate the laock design wrapper and connect external pins
   AXIToStream_test_wrapper #() ats_test (
@@ -106,7 +104,10 @@ module AXIToStream_tb ();
     // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
     master_agent.wait_drivers_idle();
     //@todo: reset only the streaming module and check if transactions still go trough
-    $finish;
+    master_agent.wr_driver.send(wr_transaction);
+    stream_slave_agent.driver.send_tready(ready_gen);
+    master_agent.wait_drivers_idle();
+    //$finish;
   end
 
 endmodule
