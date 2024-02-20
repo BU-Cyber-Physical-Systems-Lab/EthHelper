@@ -105,7 +105,14 @@ module AXIToStream_tb ();
     master_agent.wait_drivers_idle();
     //@todo: reset only the streaming module and check if transactions still go trough
     master_agent.wr_driver.send(wr_transaction);
+    
     stream_slave_agent.driver.send_tready(ready_gen);
+    
+    assert (rd_transaction.randomize());
+
+    // We send the read transaction
+    master_agent.rd_driver.send(rd_transaction);
+    
     master_agent.wait_drivers_idle();
     //$finish;
   end
