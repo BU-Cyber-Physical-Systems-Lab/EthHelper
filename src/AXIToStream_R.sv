@@ -37,64 +37,48 @@ module AXIToStream_R#(
     //module output pins
     output reg                  output_valid,
     output reg [DATA_WIDTH-1:0] output_data,
-    // AXI Slave (input wire) interface, will Fake_Sub a transaction
-    output wire [    ID_WIDTH-1:0] Fake_Sub_rid,
-    output wire [  DATA_WIDTH-1:0] Fake_Sub_rdata,
-    output wire [             1:0] Fake_Sub_rresp,
-    output wire                    Fake_Sub_rlast,
-    output wire [  USER_WIDTH-1:0] Fake_Sub_ruser,
-    output wire                    Fake_Sub_rvalid,
-    input  wire                    Fake_Sub_rready,
-    // AXI master (output wire) Interface, will forward the Fake_Subed transaction to destination
-    input  wire [    ID_WIDTH-1:0] Real_Sub_rid,
-    input  wire [  DATA_WIDTH-1:0] Real_Sub_rdata,
-    input  wire [             1:0] Real_Sub_rresp,
-    input  wire                    Real_Sub_rlast,
-    input  wire [  USER_WIDTH-1:0] Real_Sub_ruser,
-    input  wire                    Real_Sub_rvalid,
-    output wire                    Real_Sub_rready
+    // AXI Slave (input wire) interface, will AXIS a transaction
+    output wire [    ID_WIDTH-1:0] AXIS_rid,
+    output wire [  DATA_WIDTH-1:0] AXIS_rdata,
+    output wire [             1:0] AXIS_rresp,
+    output wire                    AXIS_rlast,
+    output wire [  USER_WIDTH-1:0] AXIS_ruser,
+    output wire                    AXIS_rvalid,
+    input  wire                    AXIS_rready,
+    // AXI master (output wire) Interface, will forward the AXISed transaction to destination
+    input  wire [    ID_WIDTH-1:0] AXIM_rid,
+    input  wire [  DATA_WIDTH-1:0] AXIM_rdata,
+    input  wire [             1:0] AXIM_rresp,
+    input  wire                    AXIM_rlast,
+    input  wire [  USER_WIDTH-1:0] AXIM_ruser,
+    input  wire                    AXIM_rvalid,
+    output wire                    AXIM_rready
 );
-//send data then resp or send data (if thesis will be used as a debugger)
+//send data then resp or send data
 //top level manager has to keep in mind that the Read will need 2 cycles to complete 1 read transaction
 
+  //keep track of what was sent last to alternate in between data and response
   reg sent_rdata;
+  
+  //save the response data for the next clock cycle (since it is on the same channel as R)
   reg [3:0] response;
+  //save the RID of the processor that requested this data to send in metadata packet
   reg [ID_WIDTH-1:0] ReaderID;
   
-  assign Fake_Sub_rid = Real_Sub_rid;
-  assign Fake_Sub_rdata = Real_Sub_rdata;
-  assign Fake_Sub_rresp = Real_Sub_rresp;
-  assign Fake_Sub_rlast = Real_Sub_rlast;
-  assign Fake_Sub_ruser = Real_Sub_ruser;
-  assign Fake_Sub_rvalid = Real_Sub_rvalid && can_forwardR && !sent_rdata;
-  assign Real_Sub_rready = Fake_Sub_rready && can_forwardR && !sent_rdata;
+  assign AXIS_rid = AXIM_rid;
+  assign AXIS_rdata = AXIM_rdata;
+  assign AXIS_rresp = AXIM_rresp;
+  assign AXIS_rlast = AXIM_rlast;
+  assign AXIS_ruser = AXIM_ruser;
+
+  //todo: include logic to always allow for handshaking to happen when this module is stuck in reset 
+  //i.e change everything below
+  assign AXIS_rvalid = AXIM_rvalid && can_forwardR && !sent_rdata;
+  assign AXIM_rready = AXIS_rready && can_forwardR && !sent_rdata;
   
-  assign _RH=Fake_Sub_rvalid && Real_Sub_rready;
+  assign _RH= AXIS_rvalid && AXIM_rready;
   
-  always @(posedge clk) begin
-    if(!resetn)begin 
-        output_valid<=0;
-        output_data<=0;
-        sent_rdata<=0;
-        response<=0;
-        ReaderID<=0;
-    
-    end
-    else if (_RH && !sent_rdata)begin  
-        sent_rdata<=1;
-        output_valid<=1;
-        output_data<=Real_Sub_rdata;
-        response<=Real_Sub_rresp;
-        ReaderID<=Real_Sub_rid;
-    end
-    else if(sent_rdata && can_forwardR)begin
-        output_data[127:95]<=ReaderID;
-        output_data[3:0]<=response;
-        output_valid <= output_valid;
-    end
-    else
-        output_valid <= 0;
-        output_data <= output_data;
+  always @(posedge clk) begin   
     
   end
   
