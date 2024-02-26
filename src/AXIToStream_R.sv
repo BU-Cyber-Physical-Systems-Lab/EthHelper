@@ -30,29 +30,34 @@ module AXIToStream_R#(
     parameter STREAM_TYPE = 3'b0,
     parameter STREAM_TYPE_WIDTH = 3
 ) (
-    //module inputs pins
     input  wire                  clk,
+    //negative edge synchronous reset, active low, synchronous to the clk
     input  wire                  resetn,
-    input  wire                  can_forwardR,
+    // when this ready is high we can start the transaction, otherwise we have to wait
+    input  wire                  ready,
     //module output pins
-    output reg                  output_valid,
-    output reg [DATA_WIDTH-1:0] output_data,
-    // AXI Slave (input wire) interface, will AXIS a transaction
-    output wire [    ID_WIDTH-1:0] AXIS_rid,
-    output wire [  DATA_WIDTH-1:0] AXIS_rdata,
-    output wire [             1:0] AXIS_rresp,
-    output wire                    AXIS_rlast,
-    output wire [  USER_WIDTH-1:0] AXIS_ruser,
-    output wire                    AXIS_rvalid,
-    input  wire                    AXIS_rready,
-    // AXI master (output wire) Interface, will forward the AXISed transaction to destination
-    input  wire [    ID_WIDTH-1:0] AXIM_rid,
-    input  wire [  DATA_WIDTH-1:0] AXIM_rdata,
-    input  wire [             1:0] AXIM_rresp,
-    input  wire                    AXIM_rlast,
-    input  wire [  USER_WIDTH-1:0] AXIM_ruser,
-    input  wire                    AXIM_rvalid,
-    output wire                    AXIM_rready
+    // high when this submodule has valid data to be streamed
+    output wire                  valid,
+    // high when this submodule is streaming data (to block the other submodules from streaming data at the same time)
+    output wire                  in_progress,
+    // the data to be streamed
+    output wire [DATA_WIDTH-1:0] data,
+    // AXI master (output wire) Interface, will forward the AXIS transaction to destination
+    output wire [    ID_WIDTH-1:0] AXIM_rid,
+    output wire [  DATA_WIDTH-1:0] AXIM_rdata,
+    output wire [             1:0] AXIM_rresp,
+    output wire                    AXIM_rlast,
+    output wire [  USER_WIDTH-1:0] AXIM_ruser,
+    output wire                    AXIM_rvalid,
+    input  wire                    AXIM_rready,
+    // AXI Slave (input wire) interface
+    input  wire [    ID_WIDTH-1:0] AXIS_rid,
+    input  wire [  DATA_WIDTH-1:0] AXIS_rdata,
+    input  wire [             1:0] AXIS_rresp,
+    input  wire                    AXIS_rlast,
+    input  wire [  USER_WIDTH-1:0] AXIS_ruser,
+    input  wire                    AXIS_rvalid,
+    output wire                    AXIS_rready
 );
 //send data then resp or send data
 //top level manager has to keep in mind that the Read will need 2 cycles to complete 1 read transaction
@@ -73,10 +78,10 @@ module AXIToStream_R#(
 
   //todo: include logic to always allow for handshaking to happen when this module is stuck in reset 
   //i.e change everything below
-  assign AXIS_rvalid = AXIM_rvalid && can_forwardR && !sent_rdata;
-  assign AXIM_rready = AXIS_rready && can_forwardR && !sent_rdata;
+  assign AXIS_rvalid = AXIM_rvalid && (~resetn||(ready && !sent_rdata));
+  assign AXIM_rready = AXIS_rready && (~resetn||(ready && !sent_rdata));
   
-  assign _RH= AXIS_rvalid && AXIM_rready;
+  assign valid= AXIS_rvalid && AXIM_rready;
   
   always @(posedge clk) begin   
     
