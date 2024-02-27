@@ -137,7 +137,7 @@ module AXIToStream_orchestrator #(
 );
 
 //send reset to individual submodules (and keep unwanted submodules in reset)
-reg resets[channels-1:0];
+reg [channels-1:0] resets;
 
 // how the top module signals a specific sumodule that the transaction can proceed
 wire [channels-1:0] ready;
@@ -145,12 +145,23 @@ wire [channels-1:0] ready;
 // how the submodules will signa to the top module that they have valid data (after having detected a handshake between the two orginal axi interfaces), or a multi-clock cycle transaction is still in progress (e.g. R/w).
 wire [channels-1:0] valid, in_progress;
 
+// the logic with which we pick a submodule in round robin for transmission
+assign ready = ;
+
+// with the same logicas the ready, we send the matching data
+//this has to unroll to channels-1 amount regardless if the channels are used (is there a way to do this in a neater way?)
+assign tdata = (ready[last_index] || in_progress[last_index]) ? submodule-data[last_index] :
+(ready[last_index+1] || in_progress[last_index+1]) ? submodule-data[last_index+1] : (ready[last_index+2] || in_progress[last_index+2]) ? submodule-data[last_index+2] :
+(ready[last_index+3] || in_progress[last_index+3]) ? submodule-data[last_index+3] : (ready[last_index+4] || in_progress[last_index+4]) ? submodule-data[last_index+4] : 0; //continue for all bit in channels then last else is NONE_HOT;
+
+
 enum {NONE_HOT= 5b'00000, AR_HOT=5'b00001,AW_HOT=5'b00010} hot;
 
 // since everything is relative to last_index we need also the one-hot encodings for the ready to be realtive to last_index
 reg [channels-1:0][channels-1:0] encodings;
 
 //finally also the data that we send to the AXI4stream has to be relative to last_index
+//why is this a 2d array again? was it to have one dimension to index it and the next to have the data 
 wire [channels-1:0][channels-1:0] submodule_data;
 
 //to implement round robin we need a register that will cycle between all the possible channels (when they are valid)
