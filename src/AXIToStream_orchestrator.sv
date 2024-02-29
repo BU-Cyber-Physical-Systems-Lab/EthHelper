@@ -1,13 +1,13 @@
 `timescale 1ns / 1ps
 /** @file AXIToStream_orchestrator.sv
- * @brief 
- * @author 
+ * @brief
+ * @author
  */
 
 /** @brief orchestrator top module Axi to axistream translation
- * @details 
+ * @details
  *
- * 
+ *
  */
 
 //todo
@@ -21,11 +21,13 @@ module AXIToStream_orchestrator #(
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
     parameter DEST_WIDTH = 32,
-    parameter STREAM_TYPE_WIDTH = 3,
+    // reset params
+    parameter RESET_AR = 0,
+    parameter RESET_AW = 0,
     // how many channels this module supports
-    localparam channels = 5
+    localparam channels = 2,
     //the bit needed to represent this channels in binary
-    localparam channels_bits = $clog(channels)
+    localparam channels_bits = 1  //@bug only to let the linter non have errors $clog(channels),
 
 ) (
     input  wire                    clk,
@@ -131,154 +133,176 @@ module AXIToStream_orchestrator #(
     output wire                    stream_tlast,
     output wire [  USER_WIDTH-1:0] stream_tuser,
     output wire                    stream_tvalid,
-    input  wire                    stream_tready,
-
-    
+    input  wire                    stream_tready
 );
 
-//send reset to individual submodules (and keep unwanted submodules in reset)
-reg [channels-1:0] resets;
+	//AXI stream wirings
+	assign stream_tid = 0;
+	assign stream_tdest = 0;
+	assign stream_tstrb = 0;
+  assign stream_tkeep = {DATA_WIDTH/8{1'b1}};
+	assign stream_tuser = 0;
 
-// how the top module signals a specific sumodule that the transaction can proceed
-wire [channels-1:0] ready;
+  ///send reset to individual submodules (and keep unwanted submodules in reset)
+  wire [channels-1:0] resets;
+  assign resets[0] = resetn && RESET_AR;
+  assign resets[1] = resetn && RESET_AW;
 
-// how the submodules will signa to the top module that they have valid data (after having detected a handshake between the two orginal axi interfaces), or a multi-clock cycle transaction is still in progress (e.g. R/w).
-wire [channels-1:0] valid, in_progress;
-
-// the logic with which we pick a submodule in round robin for transmission
-assign ready = ;
-
-// with the same logicas the ready, we send the matching data
-//this has to unroll to channels-1 amount regardless if the channels are used (is there a way to do this in a neater way?)
-assign tdata = (ready[last_index] || in_progress[last_index]) ? submodule-data[last_index] :
-(ready[last_index+1] || in_progress[last_index+1]) ? submodule-data[last_index+1] : (ready[last_index+2] || in_progress[last_index+2]) ? submodule-data[last_index+2] :
-(ready[last_index+3] || in_progress[last_index+3]) ? submodule-data[last_index+3] : (ready[last_index+4] || in_progress[last_index+4]) ? submodule-data[last_index+4] : 0; //continue for all bit in channels then last else is NONE_HOT;
-
-
-enum {NONE_HOT= 5b'00000, AR_HOT=5'b00001,AW_HOT=5'b00010} hot;
-
-// since everything is relative to last_index we need also the one-hot encodings for the ready to be realtive to last_index
-reg [channels-1:0][channels-1:0] encodings;
-
-//finally also the data that we send to the AXI4stream has to be relative to last_index
-//why is this a 2d array again? was it to have one dimension to index it and the next to have the data 
-wire [channels-1:0][channels-1:0] submodule_data;
-
-//to implement round robin we need a register that will cycle between all the possible channels (when they are valid)
-enum reg [channels_bits-1:0] {AR=0,AW=1,R=2,W=3,B=4} last_index;
+  /// how the top module signals a specific submodule that the transaction can proceed
+  wire [channels-1:0] ready;
+  /// the logic with which we pick a submodule in round robin for transmission
+  assign ready =  (stream_tready && valid[last_index]) ? encodings[last_index][channels-1:0] : ( stream_tready && valid[last_index+1]) ? encodings[last_index+1][channels-1:0] : NONE_HOT;
 
 
+  /// how the submodules will signal to the top module that they have valid data (after having detected a handshake between the two original axi interfaces), or a multi-clock cycle transaction is still in progress (e.g. R/w).
+  wire [channels-1:0] valid, in_progress;
+  assign stream_tvalid = |valid;
+
+  /// since everything is relative to last_index we need also the one-hot encoding for the ready to be relative to last_index
+
+  // one-hot encoding that signal that a specific channel is ready to proceed.
+  typedef enum {
+    NONE_HOT = {channels{1'b0}},  // no channel ready
+    AR_HOT = {{channels - 1{1'b0}}, 1'b1},  // AR ready
+    AW_HOT = {{channels - 2{1'b0}}, 2'b10}  //AW ready
+  } channels_encodings;
+  reg  [channels-1:0][  channels-1:0] encodings;
+
+  ///finally also the data that we send to the AXI4stream has to be relative to last_index
+  //why is this a 2d array again? was it to have one dimension to index it and the next to have the data
+  wire [channels-1:0][DATA_WIDTH-1:0] submodule_data;
+
+  ///to implement round robin we need a register that will cycle between all the possible channels (when they are valid)
+  // this register will hold the id of the last channel that has transmitted data
+  typedef enum {
+    AR_ID = 0,
+    AW_ID = 1
+  } channels_ids;
+  reg [channels_bits-1:0] last_index;
+
+  /// with the same logic as the ready, we send the matching data
+  ///this has to unroll to channels-1 amount regardless if the channels are used (is there a way to do this in a neater way?)
+  assign stream_tdata = (ready[last_index] || in_progress[last_index]) ? submodule_data[last_index][DATA_WIDTH-1:0] :
+(ready[last_index+1] || in_progress[last_index+1]) ? submodule_data[last_index+1][DATA_WIDTH-1:0] : 0; //continue for all bit in channels then last else is NONE_HOT;
 
 
+  AXIToStream_Ax #(
+      .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .ID_WIDTH(ID_WIDTH),
+      .BURST_LEN(BURST_LEN),
+      .LOCK_WIDTH(LOCK_WIDTH),
+      .USER_WIDTH(USER_WIDTH),
+      .STREAM_TYPE_WIDTH(channels_bits),
+      .STREAM_TYPE(AR_ID)
+  ) AR (
+      .clk(clk),
+      .resetn(resets[0]),
+      .ready(ready[0]),
+      .valid(valid[0]),
+      .data(submodule_data[0]),
+      .in_progress(in_progress[0]),
+			.last(stream_tlast),
 
-AXIToStream_Ax # (
-    .DATA_WIDTH(DATA_WIDTH),
-    .ADDR_WIDTH(ADDR_WIDTH),
-    .ID_WIDTH(ID_WIDTH),
-    .BURST_LEN(BURST_LEN),
-    .LOCK_WIDTH(LOCK_WIDTH),
-    .USER_WIDTH(USER_WIDTH),
-    .DEST_WIDTH(DEST_WIDTH),
-    .STREAM_TYPE_WIDTH(STREAM_TYPE_WIDTH = 3)
-) AR (
-    .clk(clk),
-    .resetn(resetn[0]),
-    .ready(ready[0]),
-    .valid(valid[0]),
-    .data(submodule_data[0]),
-    .in_progress(in_progress[0]),
+      //subordinate
+      .AXIS_axid(AXIS_arid),
+      .AXIS_axaddr(AXIS_araddr),
+      .AXIS_axlen(AXIS_arlen),
+      .AXIS_axsize(AXIS_arsize),
+      .AXIS_axburst(AXIS_arburst),
+      .AXIS_axlock(AXIS_arlock),
+      .AXIS_axcache(AXIS_arcache),
+      .AXIS_axprot(AXIS_arprot),
+      .AXIS_axregion(AXIS_arregion),
+      .AXIS_axqos(AXIS_arqos),
+      .AXIS_axuser(AXIS_aruser),
+      .AXIS_axready(AXIS_arready),
+      .AXIS_axvalid(AXIS_arvalid),
 
-    //subordinate 
-    .AXIS_arid(AXIS_arid),
-    .AXIS_araddr(AXIS_araddr),
-    .AXIS_arlen(AXIS_arlen),
-    .AXIS_arsize(AXIS_arsize),
-    .AXIS_arburst(AXIS_arburst),
-    .AXIS_arlock(AXIS_arlock),
-    .AXIS_arcache(AXIS_arcache),
-    .AXIS_arprot(AXIS_arprot),
-    .AXIS_arregion(AXIS_arregion),
-    .AXIS_arqos(AXIS_arqos),
-    .AXIS_aruser(AXIS_aruser),
-    .AXIS_arread(AXIS_arready),
+      //manager
+      .AXIM_axid(AXIM_arid),
+      .AXIM_axaddr(AXIM_araddr),
+      .AXIM_axlen(AXIM_arlen),
+      .AXIM_axsize(AXIM_arsize),
+      .AXIM_axburst(AXIM_arburst),
+      .AXIM_axlock(AXIM_arlock),
+      .AXIM_axcache(AXIM_arcache),
+      .AXIM_axprot(AXIM_arprot),
+      .AXIM_axregion(AXIM_arregion),
+      .AXIM_axqos(AXIM_arqos),
+      .AXIM_axuser(AXIM_aruser),
+      .AXIM_axready(AXIM_arready),
+      .AXIM_axvalid(AXIM_arvalid)
+  );
 
-    //manager
-    .AXIM_arid(AXIM_arid),
-    .AXIM_araddr(AXIM_araddr),
-    .AXIM_arlen(AXIM_arlen),
-    .AXIM_arsize(AXIM_arsize),
-    .AXIM_arburst(AXIM_arburst),
-    .AXIM_arlock(AXIM_arlock),
-    .AXIM_arcache(AXIM_arcache),
-    .AXIM_arprot(AXIM_arprot),
-    .AXIM_arregion(AXIM_arregion),
-    .AXIM_arqos(AXIM_arqos),
-    .AXIM_aruser(AXIM_aruser),
-    .AXIM_arread(AXIM_arready)
-);
+  AXIToStream_Ax #(
+      .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .ID_WIDTH(ID_WIDTH),
+      .BURST_LEN(BURST_LEN),
+      .LOCK_WIDTH(LOCK_WIDTH),
+      .USER_WIDTH(USER_WIDTH),
+      .STREAM_TYPE_WIDTH(channels_bits),
+      .STREAM_TYPE(AW_ID)
+  ) AW (
+      .clk(clk),
+      .resetn(resets[1]),
+      .ready(ready[1]),
+      .valid(valid[1]),
+      .data(submodule_data[1]),
+      .in_progress(in_progress[1]),
+			.last(stream_tlast),
 
-AXIToStream_Ax # (
-    .DATA_WIDTH(DATA_WIDTH),
-    .ADDR_WIDTH(ADDR_WIDTH),
-    .ID_WIDTH(ID_WIDTH),
-    .BURST_LEN(BURST_LEN),
-    .LOCK_WIDTH(LOCK_WIDTH),
-    .USER_WIDTH(USER_WIDTH),
-    .DEST_WIDTH(DEST_WIDTH),
-    .STREAM_TYPE_WIDTH(STREAM_TYPE_WIDTH = 3)
-) AW (
-    .clk(clk),
-    .resetn(resetn[1]),
-    .ready(ready[1]),
-    .valid(valid[1]),
-    .data(submodule_data[1]),
-    .in_progress(in_progress[1]),
-    
-    //subordinate
-    .AXIS_awid(AXIS_awid),
-    .AXIS_awaddr(AXIS_awaddr),
-    .AXIS_awlen(AXIS_awlen),
-    .AXIS_awsize(AXIS_awsize),
-    .AXIS_awburst(AXIS_awburst),
-    .AXIS_awlock(AXIS_awlock),
-    .AXIS_awcache(AXIS_awcache),
-    .AXIS_awprot(AXIS_awprot),
-    .AXIS_awregion(AXIS_awregion),
-    .AXIS_awqos(AXIS_awqos),
-    .AXIS_awuser(AXIS_awuser),
-    .AXIS_awread(AXIS_awready),
+      //subordinate
+      .AXIS_axid(AXIS_awid),
+      .AXIS_axaddr(AXIS_awaddr),
+      .AXIS_axlen(AXIS_awlen),
+      .AXIS_axsize(AXIS_awsize),
+      .AXIS_axburst(AXIS_awburst),
+      .AXIS_axlock(AXIS_awlock),
+      .AXIS_axcache(AXIS_awcache),
+      .AXIS_axprot(AXIS_awprot),
+      .AXIS_axregion(AXIS_awregion),
+      .AXIS_axqos(AXIS_awqos),
+      .AXIS_axuser(AXIS_awuser),
+      .AXIS_axready(AXIS_awready),
+      .AXIS_axvalid(AXIS_awvalid),
 
-    //manager
-    .AXIM_awid(AXIM_awid),
-    .AXIM_awaddr(AXIM_awaddr),
-    .AXIM_awlen(AXIM_awlen),
-    .AXIM_awsize(AXIM_awsize),
-    .AXIM_awburst(AXIM_arwburst),
-    .AXIM_awlock(AXIM_awlock),
-    .AXIM_awcache(AXIM_awcache),
-    .AXIM_awprot(AXIM_awprot),
-    .AXIM_awregion(AXIM_awregion),
-    .AXIM_awqos(AXIM_awqos),
-    .AXIM_awuser(AXIM_awuser),
-    .AXIM_awread(AXIM_awready)
-);
+      //manager
+      .AXIM_axid(AXIM_awid),
+      .AXIM_axaddr(AXIM_awaddr),
+      .AXIM_axlen(AXIM_awlen),
+      .AXIM_axsize(AXIM_awsize),
+      .AXIM_axburst(AXIM_awburst),
+      .AXIM_axlock(AXIM_awlock),
+      .AXIM_axcache(AXIM_awcache),
+      .AXIM_axprot(AXIM_awprot),
+      .AXIM_axregion(AXIM_awregion),
+      .AXIM_axqos(AXIM_awqos),
+      .AXIM_axuser(AXIM_awuser),
+      .AXIM_axready(AXIM_awready),
+      .AXIM_axvalid(AXIM_awvalid)
+  );
 
+  //have the encoding maps always be refreshed in this always block
+  //helps separate somewhat static code with the actual logic
+  always @(posedge clk) begin
+    encodings[0] <= AR_HOT;
+    encodings[1] <= AW_HOT;
+  end
 
-
-//have the encoding maps always be refreshed in this always block
-//helps separate somewhat static code with the actual logic
-always @(posedge clk)begin 
-
-end
-
-
-//always block with the for loop with break
-//Here we need to check all channels starting from last_index and accept the first valid channel (meaning that this for should unroll in a cascading if-else for all the entries encoded by the channels bit.)
-always @(posedge clk)begin 
-
-end
-
-
-
+  //always block with the for loop with break
+  //Here we need to check all channels starting from last_index and accept the first valid channel (meaning that this for should unroll in a cascading if-else for all the entries encoded by the channels bit.)
+  genvar i;
+  always @(posedge clk) begin
+    // we do 2^channels_bits iterations to check all the possible positions encoded by the channels_bits, so we can find the first valid channel by leveraging the overflow of last_index
+    for (i = 0; i < 2 ** channels_bits; i++) begin
+      if (valid[last_index+i] || in_progress[last_index+i]) begin
+        //@todo check if increment of lastindex wraps properly (unused entries are never valid or in progress)
+        last_index <= i + last_index;
+        break;
+      end
+    end
+  end
 
 endmodule
