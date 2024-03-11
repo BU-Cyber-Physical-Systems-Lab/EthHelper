@@ -1,17 +1,9 @@
 `timescale 1ns / 1ps
 /** @file AXIToStream_orchestrator.sv
- * @brief
- * @author
- */
-
-/** @brief orchestrator top module Axi to axistream translation
+ * @brief orchestrator top module Axi to axistream translation
  * @details
- *
- *
+ * todo
  */
-
-//todo
-
 
 module AXIToStream_orchestrator #(
     parameter DATA_WIDTH = 128,
@@ -27,7 +19,7 @@ module AXIToStream_orchestrator #(
     // how many channels this module supports
     localparam channels = 2,
     //the bit needed to represent this channels in binary
-    localparam channels_bits = 1  //@bug only to let the linter non have errors $clog(channels),
+    localparam channels_bits = $clog2(channels)
 
 ) (
     input  wire                    clk,
