@@ -25,9 +25,7 @@ module Dummy_AXIToStream_B # (
     parameter ID_WIDTH = 32,
     parameter BURST_LEN = 8,
     parameter LOCK_WIDTH = 2,
-    parameter USER_WIDTH = 64,
-    parameter STREAM_TYPE = 3'b0,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter USER_WIDTH = 64
 ) (
     input  wire                  clk,
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -59,7 +57,7 @@ module Dummy_AXIToStream_B # (
 assign AXIM_bid = AXIS_bid;
 assign AXIM_bresp = AXIS_bresp;
 assign AXIM_buser = AXIS_buser;
-assign AXIM_bvalid = AXIS_bvalid;
-assign AXIM_bready = AXIS_bready;
+assign AXIM_bvalid = resetn && AXIS_bvalid;
+assign AXIS_bready = resetn && AXIM_bready;
 
 endmodule

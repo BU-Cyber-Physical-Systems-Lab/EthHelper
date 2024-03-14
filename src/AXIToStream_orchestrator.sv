@@ -5,7 +5,7 @@
  * todo
  */
 
-module AXIToStream_orchestrator #(
+module AXIToStream_orchestrator # (
     parameter DATA_WIDTH = 128,
     parameter ADDR_WIDTH = 64,
     parameter ID_WIDTH = 32,
@@ -143,7 +143,7 @@ module AXIToStream_orchestrator #(
   /// how the top module signals a specific submodule that the transaction can proceed
   wire [channels-1:0] ready;
   /// the logic with which we pick a submodule in round robin for transmission
-  assign ready =  (stream_tready && valid[last_index]) ? encodings[last_index][channels-1:0] : ( stream_tready && valid[last_index+1]) ? encodings[last_index+1][channels-1:0] : NONE_HOT;
+  
 
 
   /// how the submodules will signal to the top module that they have valid data (after having detected a handshake between the two original axi interfaces), or a multi-clock cycle transaction is still in progress (e.g. R/w).
@@ -172,10 +172,14 @@ module AXIToStream_orchestrator #(
   } channels_ids;
   reg [channels_bits-1:0] last_index;
 
+  
+  
+  assign ready =  (stream_tready && valid[last_index]) ? encodings[last_index][channels-1:0] : ( stream_tready && valid[last_index+1]) ? encodings[last_index+1][channels-1:0] : NONE_HOT;
   /// with the same logic as the ready, we send the matching data
   ///this has to unroll to channels-1 amount regardless if the channels are used (is there a way to do this in a neater way?)
   assign stream_tdata = (ready[last_index] || in_progress[last_index]) ? submodule_data[last_index][DATA_WIDTH-1:0] :
 (ready[last_index+1] || in_progress[last_index+1]) ? submodule_data[last_index+1][DATA_WIDTH-1:0] : 0; //continue for all bit in channels then last else is NONE_HOT;
+
 
 
   AXIToStream_Ax #(
@@ -276,8 +280,13 @@ module AXIToStream_orchestrator #(
       .AXIM_axvalid(AXIM_awvalid)
   );
 
-  Dummy_AXIToStream_B #(
-
+  Dummy_AXIToStream_B #  (
+    .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .ID_WIDTH(ID_WIDTH),
+      .BURST_LEN(BURST_LEN),
+      .LOCK_WIDTH(LOCK_WIDTH),
+      .USER_WIDTH(USER_WIDTH)
   ) DB (
     .clk(clk),
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -298,7 +307,12 @@ module AXIToStream_orchestrator #(
   );
 
   Dummy_AXIToStream_R # (
-
+    .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .ID_WIDTH(ID_WIDTH),
+      .BURST_LEN(BURST_LEN),
+      .LOCK_WIDTH(LOCK_WIDTH),
+      .USER_WIDTH(USER_WIDTH)
   ) DR (
     .clk(clk),
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -322,7 +336,12 @@ module AXIToStream_orchestrator #(
   );
 
   Dummy_AXIToStream_W # (
-
+    .DATA_WIDTH(DATA_WIDTH),
+      .ADDR_WIDTH(ADDR_WIDTH),
+      .ID_WIDTH(ID_WIDTH),
+      .BURST_LEN(BURST_LEN),
+      .LOCK_WIDTH(LOCK_WIDTH),
+      .USER_WIDTH(USER_WIDTH)
   ) DW (
     .clk(clk),
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -354,7 +373,7 @@ module AXIToStream_orchestrator #(
 
   //always block with the for loop with break
   //Here we need to check all channels starting from last_index and accept the first valid channel (meaning that this for should unroll in a cascading if-else for all the entries encoded by the channels bit.)
-  genvar i;
+  integer i;
   always @(posedge clk) begin
     // we do 2^channels_bits iterations to check all the possible positions encoded by the channels_bits, so we can find the first valid channel by leveraging the overflow of last_index
     for (i = 0; i < 2 ** channels_bits; i++) begin

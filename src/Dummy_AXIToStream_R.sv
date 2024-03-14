@@ -26,9 +26,7 @@ module Dummy_AXIToStream_R # (
     parameter ID_WIDTH = 32,
     parameter BURST_LEN = 8,
     parameter LOCK_WIDTH = 2,
-    parameter USER_WIDTH = 64,
-    parameter STREAM_TYPE = 3'b0,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter USER_WIDTH = 64
 ) (
     input  wire                  clk,
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -69,15 +67,14 @@ module Dummy_AXIToStream_R # (
 
   //save the RID of the processor that requested this data to send in metadata packet
   
-  assign AXIS_rid = AXIM_rid;
-  assign AXIS_rdata = AXIM_rdata;
-  assign AXIS_rresp = AXIM_rresp;
-  assign AXIS_rlast = AXIM_rlast;
-  assign AXIS_ruser = AXIM_ruser;
+  assign AXIM_rid = AXIS_rid;
+  assign AXIM_rdata = AXIS_rdata;
+  assign AXIM_rresp = AXIS_rlast;
+  assign AXIM_ruser = AXIS_ruser;
 
   //todo: include logic to always allow for handshaking to happen when this module is stuck in reset 
   //i.e change everything below
-  assign AXIS_rvalid = AXIM_rvalid;
-  assign AXIM_rready = AXIS_rready;
+  assign AXIM_rvalid = resetn && AXIS_rvalid;
+  assign AXIS_rready = resetn && AXIM_rready;
 
 endmodule
