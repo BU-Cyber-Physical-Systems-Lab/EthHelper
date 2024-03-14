@@ -57,7 +57,7 @@ module Dummy_AXIToStream_B # (
 assign AXIM_bid = AXIS_bid;
 assign AXIM_bresp = AXIS_bresp;
 assign AXIM_buser = AXIS_buser;
-assign AXIM_bvalid = AXIS_bvalid;
-assign AXIM_bready = AXIS_bready;
+assign AXIM_bvalid = resetn && AXIS_bvalid;
+assign AXIS_bready = resetn && AXIM_bready;
 
 endmodule

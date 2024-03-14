@@ -63,8 +63,8 @@ assign AXIM_wdata = AXIS_wdata;
 assign AXIM_wuser = AXIS_wuser;
 assign AXIM_wlast = AXIS_wlast;
 assign AXIM_wstrb = AXIS_wstrb;
-assign AXIM_wvalid = AXIS_wvalid;
-assign AXIM_wready = AXIS_wready;
+assign AXIM_wvalid = resetn && AXIS_wvalid;
+assign AXIS_wready = resetn && AXIM_wready;
 
 
 endmodule
