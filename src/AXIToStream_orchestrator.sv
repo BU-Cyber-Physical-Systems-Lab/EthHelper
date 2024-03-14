@@ -276,6 +276,75 @@ module AXIToStream_orchestrator #(
       .AXIM_axvalid(AXIM_awvalid)
   );
 
+  Dummy_AXIToStream_B #(
+
+  ) DB (
+    .clk(clk),
+    //negative edge synchronous reset, active low, synchronous to the clk
+    .resetn(resetn),
+    
+    // AXI master (output wire) Interface, will forward the AXIS transaction to destination
+    .AXIM_bid(AXIM_bid),
+    .AXIM_bresp(AXIM_bresp),
+    .AXIM_buser(AXIM_buser),
+    .AXIM_bvalid(AXIM_bvalid),
+    .AXIM_bready(AXIM_bready),
+    // AXI Slave (input wire) interface
+    .AXIS_bid(AXIS_bid),
+    .AXIS_bresp(AXIS_bresp),
+    .AXIS_buser(AXIS_buser),
+    .AXIS_bvalid(AXIS_bvalid),
+    .AXIS_bready(AXIS_bready)
+  );
+
+  Dummy_AXIToStream_R # (
+
+  ) DR (
+    .clk(clk),
+    //negative edge synchronous reset, active low, synchronous to the clk
+    .resetn(resetn),
+    // AXI master (output wire) Interface, will forward the AXIS transaction to destination
+    .AXIM_rid(AXIM_rid),
+    .AXIM_rdata(AXIM_rdata),
+    .AXIM_rresp(AXIM_rresp),
+    .AXIM_rlast(AXIM_rlast),
+    .AXIM_ruser(AXIM_ruser),
+    .AXIM_rvalid(AXIM_rvalid),
+    .AXIM_rready(AXIM_rready),
+    // AXI Slave (input wire) interface
+    .AXIS_rid(AXIS_rid),
+    .AXIS_rdata(AXIS_rdata),
+    .AXIS_rresp(AXIS_rresp),
+    .AXIS_rlast(AXIS_rlast),
+    .AXIS_ruser(AXIS_ruser),
+    .AXIS_rvalid(AXIS_rvalid),
+    .AXIS_rready(AXIS_rready)
+  );
+
+  Dummy_AXIToStream_W # (
+
+  ) DW (
+    .clk(clk),
+    //negative edge synchronous reset, active low, synchronous to the clk
+    .resetn(resetn),
+    // AXI master (output wire) Interface, will forward the AXIS transaction to destination
+    .AXIM_wid(AXIM_wid),
+    .AXIM_wdata(AXIM_wdata),
+    .AXIM_wstrb(AXIM_wstrb),
+    .AXIM_wlast(AXIM_wlast),
+    .AXIM_wuser(AXIM_wuser),
+    .AXIM_wvalid(AXIM_wvalid),
+    .AXIM_wready(AXIM_wready),
+    // AXI Slave (input wire) interface
+    .AXIS_wid(AXIS_wid),
+    .AXIS_wdata(AXIS_wdata),
+    .AXIS_wstrb(AXIS_wstrb),
+    .AXIS_wlast(AXIS_wlast),
+    .AXIS_wuser(AXIS_wuser),
+    .AXIS_wvalid(AXIS_wvalid),
+    .AXIS_wready(AXIS_wready)
+  );
+
   //have the encoding maps always be refreshed in this always block
   //helps separate somewhat static code with the actual logic
   always @(posedge clk) begin
