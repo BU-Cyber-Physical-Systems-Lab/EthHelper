@@ -61,7 +61,6 @@ module AXIToStream_R #(
   //when we get a ready, we have know when the burst is done
   //so we have a sending register, that will be high when we are in the middle of a burst
   reg sending;
-  assign last = AXIS_rlast;
   assign AXIM_rid = AXIS_rid;
   assign AXIM_rdata = AXIS_rdata;
   assign AXIM_rresp = AXIS_rresp;
@@ -77,6 +76,8 @@ module AXIToStream_R #(
   assign valid = resetn && AXIS_rvalid && AXIM_rready;
 
   assign in_progress = sending;
+	//we mask last with reset, to avoid problems if the reset is asserted
+  assign last = resetn & AXIS_rlast;
 
   //the sending register will determine if we are sending data or metadata
   assign data =  //did we get a handshake?
