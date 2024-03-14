@@ -26,9 +26,7 @@ module Dummy_AXIToStream_R # (
     parameter ID_WIDTH = 32,
     parameter BURST_LEN = 8,
     parameter LOCK_WIDTH = 2,
-    parameter USER_WIDTH = 64,
-    parameter STREAM_TYPE = 3'b0,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter USER_WIDTH = 64
 ) (
     input  wire                  clk,
     //negative edge synchronous reset, active low, synchronous to the clk

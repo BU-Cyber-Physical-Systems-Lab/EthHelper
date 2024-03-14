@@ -25,9 +25,7 @@ module Dummy_AXIToStream_W # (
     parameter ID_WIDTH = 32,
     parameter BURST_LEN = 8,
     parameter LOCK_WIDTH = 2,
-    parameter USER_WIDTH = 64,
-    parameter STREAM_TYPE = 3'b0,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter USER_WIDTH = 64
 ) (
     input  wire                  clk,
     //negative edge synchronous reset, active low, synchronous to the clk
@@ -44,7 +42,7 @@ module Dummy_AXIToStream_W # (
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
     output wire [    ID_WIDTH-1:0] AXIM_wid,
     output wire [             1:0] AXIM_wdata,
-    output wire [$clog2(DATA_WIDTH):0] AXIM_wstrb,
+    output wire [DATA_WIDTH/8-1:0] AXIM_wstrb,
     output wire                    AXIM_wlast,
     output wire [  USER_WIDTH-1:0] AXIM_wuser,
     output wire                    AXIM_wvalid,
@@ -52,11 +50,11 @@ module Dummy_AXIToStream_W # (
     // AXI Slave (input wire) interface
     input wire [    ID_WIDTH-1:0] AXIS_wid,
     input wire [DATA_WIDTH-1:0] AXIS_wdata,
-    input wire [$clog2(DATA_WIDTH):0] AXIS_wstrb,
+    input wire [DATA_WIDTH/8-1:0] AXIS_wstrb,
     input wire                    AXIS_wlast,
     input wire [  USER_WIDTH-1:0] AXIS_wuser,
     input wire                    AXIS_wvalid,
-    output  wire                  AXIS_wready,
+    output  wire                  AXIS_wready
 );
 
 
