@@ -24,7 +24,7 @@ module AXIToStream_W #(
     parameter DATA_WIDTH = 128,
     parameter ID_WIDTH = 32,
     parameter USER_WIDTH = 64,
-    parameter STREAM_TYPE = 3'b0,
+    parameter STREAM_TYPE = 3'b011,
     parameter STREAM_TYPE_WIDTH = 3,
     parameter BURST_SIZE = 4
 ) (
