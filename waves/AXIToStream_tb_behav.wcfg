@@ -15,15 +15,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="1000001fs"></ZoomEndTime>
-      <Cursor1Time time="505000fs"></Cursor1Time>
+      <ZoomStartTime time="939933fs"></ZoomStartTime>
+      <ZoomEndTime time="1012014fs"></ZoomEndTime>
+      <Cursor1Time time="941358fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="175"></NameColumnWidth>
-      <ValueColumnWidth column_width="106"></ValueColumnWidth>
+      <ValueColumnWidth column_width="98"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="16" />
+   <WVObjectSize size="13" />
    <wvobject type="logic" fp_name="/AXIToStream_tb/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -31,78 +31,6 @@
    <wvobject type="logic" fp_name="/AXIToStream_tb/resetn">
       <obj_property name="ElementShortName">resetn</obj_property>
       <obj_property name="ObjectShortName">resetn</obj_property>
-   </wvobject>
-   <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/SNOOP_AXI">
-      <obj_property name="children_use_element_short_name">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
-      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
-      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="CustomSignalColor">turquoise</obj_property>
-      <obj_property name="Render_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/SNOOP_AXI.readWriteSummary</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <obj_property name="CellHeight">36</obj_property>
-      <obj_property name="ElementShortName">SNOOP_AXI</obj_property>
-      <obj_property name="ObjectShortName">SNOOP_AXI</obj_property>
-      <obj_property name="isExpanded"></obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_stream_type">
-      <obj_property name="ElementShortName">_stream_type[2:0]</obj_property>
-      <obj_property name="ObjectShortName">_stream_type[2:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_address_rr">
-      <obj_property name="ElementShortName">_address_rr[1:0]</obj_property>
-      <obj_property name="ObjectShortName">_address_rr[1:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_stream_data">
-      <obj_property name="ElementShortName">_stream_data[127:0]</obj_property>
-      <obj_property name="ObjectShortName">_stream_data[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_stream_data_next">
-      <obj_property name="ElementShortName">_stream_data_next[127:0]</obj_property>
-      <obj_property name="ObjectShortName">_stream_data_next[127:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_stream_strobe">
-      <obj_property name="ElementShortName">_stream_strobe[15:0]</obj_property>
-      <obj_property name="ObjectShortName">_stream_strobe[15:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/_burst_len">
-      <obj_property name="ElementShortName">_burst_len[8:0]</obj_property>
-      <obj_property name="ObjectShortName">_burst_len[8:0]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/can_forwardAR">
-      <obj_property name="ElementShortName">can_forwardAR</obj_property>
-      <obj_property name="ObjectShortName">can_forwardAR</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/can_forwardAW">
-      <obj_property name="ElementShortName">can_forwardAW</obj_property>
-      <obj_property name="ObjectShortName">can_forwardAW</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/can_forwardR">
-      <obj_property name="ElementShortName">can_forwardR</obj_property>
-      <obj_property name="ObjectShortName">can_forwardR</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/can_forwardW">
-      <obj_property name="ElementShortName">can_forwardW</obj_property>
-      <obj_property name="ObjectShortName">can_forwardW</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/can_forwardB">
-      <obj_property name="ElementShortName">can_forwardB</obj_property>
-      <obj_property name="ObjectShortName">can_forwardB</obj_property>
-   </wvobject>
-   <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/FORWARD_AXI">
-      <obj_property name="children_use_element_short_name">true</obj_property>
-      <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
-      <obj_property name="EnumTransactionColorTable">0=blank 1=#D399FF 2=pink</obj_property>
-      <obj_property name="EnumTransactionValueTable">0=blank;1=Read;2=Write;3=Read/Write</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-      <obj_property name="CustomSignalColor">turquoise</obj_property>
-      <obj_property name="Render_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/FORWARD_AXI.readWriteSummary</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <obj_property name="CellHeight">36</obj_property>
-      <obj_property name="ElementShortName">FORWARD_AXI</obj_property>
-      <obj_property name="ObjectShortName">FORWARD_AXI</obj_property>
-      <obj_property name="isExpanded"></obj_property>
    </wvobject>
    <wvobject type="protoinst" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI">
       <obj_property name="children_use_element_short_name">true</obj_property>
@@ -119,6 +47,493 @@
       <obj_property name="Detail_Data">/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/STREAM_AXI.streamTooltipData</obj_property>
       <obj_property name="ElementShortName">STREAM_AXI</obj_property>
       <obj_property name="ObjectShortName">STREAM_AXI</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/i">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/last_index">
+      <obj_property name="ElementShortName">last_index[2:0]</obj_property>
+      <obj_property name="ObjectShortName">last_index[2:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/encodings">
+      <obj_property name="ElementShortName">encodings[4:0][4:0]</obj_property>
+      <obj_property name="ObjectShortName">encodings[4:0][4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/in_progress">
+      <obj_property name="ElementShortName">in_progress[4:0]</obj_property>
+      <obj_property name="ObjectShortName">in_progress[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/valid">
+      <obj_property name="ElementShortName">valid[4:0]</obj_property>
+      <obj_property name="ObjectShortName">valid[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/ready">
+      <obj_property name="ElementShortName">ready[4:0]</obj_property>
+      <obj_property name="ObjectShortName">ready[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/resets">
+      <obj_property name="ElementShortName">resets[4:0]</obj_property>
+      <obj_property name="ObjectShortName">resets[4:0]</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group1070">
+      <obj_property name="label">AR</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/resetn">
+         <obj_property name="ElementShortName">resetn</obj_property>
+         <obj_property name="ObjectShortName">resetn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/ready">
+         <obj_property name="ElementShortName">ready</obj_property>
+         <obj_property name="ObjectShortName">ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/valid">
+         <obj_property name="ElementShortName">valid</obj_property>
+         <obj_property name="ObjectShortName">valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/in_progress">
+         <obj_property name="ElementShortName">in_progress</obj_property>
+         <obj_property name="ObjectShortName">in_progress</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/last">
+         <obj_property name="ElementShortName">last</obj_property>
+         <obj_property name="ObjectShortName">last</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/data">
+         <obj_property name="ElementShortName">data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">data[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIS_axid">
+         <obj_property name="ElementShortName">AXIS_axid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIS_axaddr">
+         <obj_property name="ElementShortName">AXIS_axaddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axaddr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIS_axlen">
+         <obj_property name="ElementShortName">AXIS_axlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIS_axvalid">
+         <obj_property name="ElementShortName">AXIS_axvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIS_axready">
+         <obj_property name="ElementShortName">AXIS_axready</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIM_axid">
+         <obj_property name="ElementShortName">AXIM_axid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIM_axaddr">
+         <obj_property name="ElementShortName">AXIM_axaddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axaddr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIM_axlen">
+         <obj_property name="ElementShortName">AXIM_axlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIM_axvalid">
+         <obj_property name="ElementShortName">AXIM_axvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AR/AXIM_axready">
+         <obj_property name="ElementShortName">AXIM_axready</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axready</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1069">
+      <obj_property name="label">AW</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/resetn">
+         <obj_property name="ElementShortName">resetn</obj_property>
+         <obj_property name="ObjectShortName">resetn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/ready">
+         <obj_property name="ElementShortName">ready</obj_property>
+         <obj_property name="ObjectShortName">ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/valid">
+         <obj_property name="ElementShortName">valid</obj_property>
+         <obj_property name="ObjectShortName">valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/in_progress">
+         <obj_property name="ElementShortName">in_progress</obj_property>
+         <obj_property name="ObjectShortName">in_progress</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/last">
+         <obj_property name="ElementShortName">last</obj_property>
+         <obj_property name="ObjectShortName">last</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/data">
+         <obj_property name="ElementShortName">data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">data[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axid">
+         <obj_property name="ElementShortName">AXIS_axid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axaddr">
+         <obj_property name="ElementShortName">AXIS_axaddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axaddr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axlen">
+         <obj_property name="ElementShortName">AXIS_axlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axsize">
+         <obj_property name="ElementShortName">AXIS_axsize[2:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axsize[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axburst">
+         <obj_property name="ElementShortName">AXIS_axburst[1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axburst[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axlock">
+         <obj_property name="ElementShortName">AXIS_axlock[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axlock[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axcache">
+         <obj_property name="ElementShortName">AXIS_axcache[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axcache[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axprot">
+         <obj_property name="ElementShortName">AXIS_axprot[2:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axprot[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axregion">
+         <obj_property name="ElementShortName">AXIS_axregion[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axregion[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axqos">
+         <obj_property name="ElementShortName">AXIS_axqos[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axqos[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axuser">
+         <obj_property name="ElementShortName">AXIS_axuser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axuser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axvalid">
+         <obj_property name="ElementShortName">AXIS_axvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIS_axready">
+         <obj_property name="ElementShortName">AXIS_axready</obj_property>
+         <obj_property name="ObjectShortName">AXIS_axready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axid">
+         <obj_property name="ElementShortName">AXIM_axid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axaddr">
+         <obj_property name="ElementShortName">AXIM_axaddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axaddr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axlen">
+         <obj_property name="ElementShortName">AXIM_axlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axsize">
+         <obj_property name="ElementShortName">AXIM_axsize[2:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axsize[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axburst">
+         <obj_property name="ElementShortName">AXIM_axburst[1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axburst[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axlock">
+         <obj_property name="ElementShortName">AXIM_axlock[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axlock[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axcache">
+         <obj_property name="ElementShortName">AXIM_axcache[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axcache[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axprot">
+         <obj_property name="ElementShortName">AXIM_axprot[2:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axprot[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axregion">
+         <obj_property name="ElementShortName">AXIM_axregion[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axregion[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axqos">
+         <obj_property name="ElementShortName">AXIM_axqos[3:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axqos[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axuser">
+         <obj_property name="ElementShortName">AXIM_axuser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axuser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axvalid">
+         <obj_property name="ElementShortName">AXIM_axvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/AXIM_axready">
+         <obj_property name="ElementShortName">AXIM_axready</obj_property>
+         <obj_property name="ObjectShortName">AXIM_axready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/DATA_WIDTH">
+         <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/ADDR_WIDTH">
+         <obj_property name="ElementShortName">ADDR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ADDR_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/ID_WIDTH">
+         <obj_property name="ElementShortName">ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/BURST_LEN">
+         <obj_property name="ElementShortName">BURST_LEN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">BURST_LEN[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/LOCK_WIDTH">
+         <obj_property name="ElementShortName">LOCK_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LOCK_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/USER_WIDTH">
+         <obj_property name="ElementShortName">USER_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">USER_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/AW/STREAM_TYPE">
+         <obj_property name="ElementShortName">STREAM_TYPE[2:0]</obj_property>
+         <obj_property name="ObjectShortName">STREAM_TYPE[2:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group1098">
+      <obj_property name="label">R</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/resetn">
+         <obj_property name="ElementShortName">resetn</obj_property>
+         <obj_property name="ObjectShortName">resetn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/ready">
+         <obj_property name="ElementShortName">ready</obj_property>
+         <obj_property name="ObjectShortName">ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/valid">
+         <obj_property name="ElementShortName">valid</obj_property>
+         <obj_property name="ObjectShortName">valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/in_progress">
+         <obj_property name="ElementShortName">in_progress</obj_property>
+         <obj_property name="ObjectShortName">in_progress</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/last">
+         <obj_property name="ElementShortName">last</obj_property>
+         <obj_property name="ObjectShortName">last</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/data">
+         <obj_property name="ElementShortName">data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">data[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rid">
+         <obj_property name="ElementShortName">AXIM_rid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rdata">
+         <obj_property name="ElementShortName">AXIM_rdata[127:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rdata[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rresp">
+         <obj_property name="ElementShortName">AXIM_rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rlast">
+         <obj_property name="ElementShortName">AXIM_rlast</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rlast</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_ruser">
+         <obj_property name="ElementShortName">AXIM_ruser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_ruser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rvalid">
+         <obj_property name="ElementShortName">AXIM_rvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIM_rready">
+         <obj_property name="ElementShortName">AXIM_rready</obj_property>
+         <obj_property name="ObjectShortName">AXIM_rready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rid">
+         <obj_property name="ElementShortName">AXIS_rid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rdata">
+         <obj_property name="ElementShortName">AXIS_rdata[127:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rdata[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rresp">
+         <obj_property name="ElementShortName">AXIS_rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rlast">
+         <obj_property name="ElementShortName">AXIS_rlast</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rlast</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_ruser">
+         <obj_property name="ElementShortName">AXIS_ruser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_ruser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rvalid">
+         <obj_property name="ElementShortName">AXIS_rvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/AXIS_rready">
+         <obj_property name="ElementShortName">AXIS_rready</obj_property>
+         <obj_property name="ObjectShortName">AXIS_rready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/sending">
+         <obj_property name="ElementShortName">sending</obj_property>
+         <obj_property name="ObjectShortName">sending</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/DATA_WIDTH">
+         <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/ID_WIDTH">
+         <obj_property name="ElementShortName">ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/USER_WIDTH">
+         <obj_property name="ElementShortName">USER_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">USER_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/STREAM_TYPE">
+         <obj_property name="ElementShortName">STREAM_TYPE[2:0]</obj_property>
+         <obj_property name="ObjectShortName">STREAM_TYPE[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/R/STREAM_TYPE_WIDTH">
+         <obj_property name="ElementShortName">STREAM_TYPE_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">STREAM_TYPE_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/resetn">
+         <obj_property name="ElementShortName">resetn</obj_property>
+         <obj_property name="ObjectShortName">resetn</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/ready">
+         <obj_property name="ElementShortName">ready</obj_property>
+         <obj_property name="ObjectShortName">ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/valid">
+         <obj_property name="ElementShortName">valid</obj_property>
+         <obj_property name="ObjectShortName">valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/in_progress">
+         <obj_property name="ElementShortName">in_progress</obj_property>
+         <obj_property name="ObjectShortName">in_progress</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/last">
+         <obj_property name="ElementShortName">last</obj_property>
+         <obj_property name="ObjectShortName">last</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/data">
+         <obj_property name="ElementShortName">data[127:0]</obj_property>
+         <obj_property name="ObjectShortName">data[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wid">
+         <obj_property name="ElementShortName">AXIM_wid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wdata">
+         <obj_property name="ElementShortName">AXIM_wdata[127:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wdata[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wstrb">
+         <obj_property name="ElementShortName">AXIM_wstrb[15:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wstrb[15:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wlast">
+         <obj_property name="ElementShortName">AXIM_wlast</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wlast</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wuser">
+         <obj_property name="ElementShortName">AXIM_wuser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wuser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wvalid">
+         <obj_property name="ElementShortName">AXIM_wvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIM_wready">
+         <obj_property name="ElementShortName">AXIM_wready</obj_property>
+         <obj_property name="ObjectShortName">AXIM_wready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wid">
+         <obj_property name="ElementShortName">AXIS_wid[7:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wid[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wdata">
+         <obj_property name="ElementShortName">AXIS_wdata[127:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wdata[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wstrb">
+         <obj_property name="ElementShortName">AXIS_wstrb[15:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wstrb[15:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wlast">
+         <obj_property name="ElementShortName">AXIS_wlast</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wlast</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wuser">
+         <obj_property name="ElementShortName">AXIS_wuser[-1:0]</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wuser[-1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wvalid">
+         <obj_property name="ElementShortName">AXIS_wvalid</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/AXIS_wready">
+         <obj_property name="ElementShortName">AXIS_wready</obj_property>
+         <obj_property name="ObjectShortName">AXIS_wready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/state">
+         <obj_property name="ElementShortName">state[1:0]</obj_property>
+         <obj_property name="ObjectShortName">state[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/strobes">
+         <obj_property name="ElementShortName">strobes[127:0]</obj_property>
+         <obj_property name="ObjectShortName">strobes[127:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/DATA_WIDTH">
+         <obj_property name="ElementShortName">DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/ID_WIDTH">
+         <obj_property name="ElementShortName">ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/USER_WIDTH">
+         <obj_property name="ElementShortName">USER_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">USER_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/STREAM_TYPE">
+         <obj_property name="ElementShortName">STREAM_TYPE[2:0]</obj_property>
+         <obj_property name="ObjectShortName">STREAM_TYPE[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/STREAM_TYPE_WIDTH">
+         <obj_property name="ElementShortName">STREAM_TYPE_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">STREAM_TYPE_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/AXIToStream_tb/ats_test/AXIToStream_test_i/AXIToStream_wrapper_0/inst/axi_to_stream/W/BURST_SIZE">
+         <obj_property name="ElementShortName">BURST_SIZE[31:0]</obj_property>
+         <obj_property name="ObjectShortName">BURST_SIZE[31:0]</obj_property>
+      </wvobject>
    </wvobject>
 </wave_config>

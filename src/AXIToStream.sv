@@ -13,12 +13,6 @@ module AXIToStream #(
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
     parameter DEST_WIDTH = 32,
-    // reset params
-    parameter RESET_AR = 0,
-    parameter RESET_AW = 0,
-    parameter RESET_R = 0,
-    parameter RESET_W = 0,
-    parameter RESET_B = 0,
     // how many channels this module supports
     localparam channels = 5,
     //the bit needed to represent this channels in binary
@@ -42,6 +36,12 @@ module AXIToStream #(
 ) (
     input  wire                    clk,
     input  wire                    resetn,
+    // reset params
+    input  wire                    RESETN_AR,
+    input  wire                    RESETN_AW,
+    input  wire                    RESETN_R,
+    input  wire                    RESETN_W,
+    input  wire                    RESETN_B,
     // AXI Slave (input wire) interface, will AXIS a transaction
     input  wire [    ID_WIDTH-1:0] AXIS_awid,
     input  wire [  ADDR_WIDTH-1:0] AXIS_awaddr,
@@ -144,6 +144,7 @@ module AXIToStream #(
     output wire [  USER_WIDTH-1:0] stream_tuser,
     output wire                    stream_tvalid,
     input  wire                    stream_tready
+
 );
   //Submodules instantiation
   AXIToStream_Ax #(
@@ -162,7 +163,7 @@ module AXIToStream #(
       .valid(valid[AR_ID]),
       .data(submodule_data[AR_ID]),
       .in_progress(in_progress[AR_ID]),
-      .last(stream_tlast),
+      .last(last[AR_ID]),
 
       //subordinate
       .AXIS_axid(AXIS_arid),
@@ -211,7 +212,7 @@ module AXIToStream #(
       .valid(valid[AW_ID]),
       .data(submodule_data[AW_ID]),
       .in_progress(in_progress[AW_ID]),
-      .last(stream_tlast),
+      .last(last[AW_ID]),
 
       //subordinate
       .AXIS_axid(AXIS_awid),
@@ -257,7 +258,7 @@ module AXIToStream #(
       .valid(valid[B_ID]),
       .data(submodule_data[B_ID]),
       .in_progress(in_progress[B_ID]),
-      .last(stream_tlast),
+      .last(last[B_ID]),
 
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_bid(AXIM_bid),
@@ -286,7 +287,7 @@ module AXIToStream #(
       .valid(valid[R_ID]),
       .data(submodule_data[R_ID]),
       .in_progress(in_progress[R_ID]),
-      .last(stream_tlast),
+      .last(last[R_ID]),
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_rid(AXIM_rid),
       .AXIM_rdata(AXIM_rdata),
@@ -319,7 +320,7 @@ module AXIToStream #(
       .valid(valid[W_ID]),
       .data(submodule_data[W_ID]),
       .in_progress(in_progress[W_ID]),
-      .last(stream_tlast),
+      .last(last[W_ID]),
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_wid(AXIM_wid),
       .AXIM_wdata(AXIM_wdata),
@@ -348,14 +349,16 @@ module AXIToStream #(
 
   ///send reset to individual submodules (and keep unwanted submodules in reset)
   wire [channels-1:0] resets;
-  assign resets[AR_ID] = resetn && RESET_AR;
-  assign resets[AW_ID] = resetn && RESET_AW;
-  assign resets[R_ID]  = resetn && RESET_R;
-  assign resets[W_ID]  = resetn && RESET_W;
-  assign resets[B_ID]  = resetn && RESET_B;
+  assign resets[AR_ID] = resetn && RESETN_AR;
+  assign resets[AW_ID] = resetn && RESETN_AW;
+  assign resets[R_ID]  = resetn && RESETN_R;
+  assign resets[W_ID]  = resetn && RESETN_W;
+  assign resets[B_ID]  = resetn && RESETN_B;
 
   /// how the top module signals a specific submodule that the transaction can proceed
   wire [channels-1:0] ready;
+  // each submodule has a last signal
+  wire [channels-1:0] last;
 
   /// how the submodules will signal to the top module that they have valid data
   /// (after having detected a handshake between the two original axi
@@ -392,12 +395,22 @@ module AXIToStream #(
 
   /// with the same logic as the ready, we send the matching data
   ///this has to unroll to channels-1 amount regardless if the channels are used
-	//@todo is there a way to do this in a neater way?
+  //@todo is there a way to do this in a neater way?
   assign stream_tdata = (ready[last_index] || in_progress[last_index]) ? submodule_data[last_index][DATA_WIDTH-1:0] :
 (ready[last_index+1] || in_progress[last_index+1]) ? submodule_data[last_index+1][DATA_WIDTH-1:0] :
 (ready[last_index+2] || in_progress[last_index+2]) ? submodule_data[last_index+2][DATA_WIDTH-1:0] :
 (ready[last_index+3] || in_progress[last_index+3]) ? submodule_data[last_index+3][DATA_WIDTH-1:0] :
 (ready[last_index+4] || in_progress[last_index+4]) ? submodule_data[last_index+4][DATA_WIDTH-1:0] :
+ 0; //continue for all channels then last else is 0;
+
+  /// with the same logic as the ready, we choose which last to forward
+  ///this has to unroll to channels-1 amount regardless if the channels are used
+  //@todo is there a way to do this in a neater way?
+  assign stream_tlast = (ready[last_index] || in_progress[last_index]) ? last[last_index] :
+(ready[last_index+1] || in_progress[last_index+1]) ? last[last_index+1] :
+(ready[last_index+2] || in_progress[last_index+2]) ? last[last_index+2] :
+(ready[last_index+3] || in_progress[last_index+3]) ? last[last_index+3] :
+(ready[last_index+4] || in_progress[last_index+4]) ? last[last_index+4] :
  0; //continue for all channels then last else is 0;
 
   //have the encoding maps always be refreshed in this always block
@@ -417,17 +430,21 @@ module AXIToStream #(
   //the channels bit.)
   integer i;
   always @(posedge clk) begin
-    //we do 2^channels_bits iterations to check all the possible positions
-    //encoded by the channels_bits, so we can find the first valid channel by
-    //leveraging the overflow of last_index
+    if (resetn) begin
+      //we do 2^channels_bits iterations to check all the possible positions
+      //encoded by the channels_bits, so we can find the first valid channel by
+      //leveraging the overflow of last_index
 
-    // @todo check if increment of last_index wraps properly (unused entries
-    // encoded by the channels_bits should be skipped)
-    for (i = 0; i < 2 ** channels_bits; i++) begin
-      if ((last_index + i < channels) && (valid[last_index+i] || in_progress[last_index+i])) begin
-        last_index <= i + last_index;
-        break;
+      // @todo check if increment of last_index wraps properly (unused entries
+      // encoded by the channels_bits should be skipped)
+      for (i = 0; i < channels; i++) begin
+        if ((valid[last_index+i] || in_progress[last_index+i])) begin
+          last_index <= i + last_index;
+          break;
+        end
       end
+    end else begin
+      last_index <= 0;
     end
   end
 

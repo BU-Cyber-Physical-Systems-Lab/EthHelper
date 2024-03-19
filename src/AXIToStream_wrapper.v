@@ -7,339 +7,343 @@
 module AXIToStream_wrapper #(
     parameter DATA_WIDTH = 128,
     parameter ADDR_WIDTH = 64,
-    parameter ID_WIDTH = 32,
-    parameter BURST_LEN = 8,
+    parameter ID_WIDTH   = 32,
+    parameter BURST_LEN  = 8,
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
-    parameter DEST_WIDTH = 32,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter DEST_WIDTH = 32
 ) (
     input  wire                    clk,
     input  wire                    resetn,
     // AXI Slave (input wire) interface, will snoop a transaction
     // Uncomment the following to set interface specific parameter on the bus interface.
     //  (* X_INTERFACE_PARAMETER = "CLK_DOMAIN <value>,PHASE <value>,MAX_BURST_LENGTH <value>,NUM_WRITE_OUTSTANDING <value>,NUM_READ_OUTSTANDING <value>,SUPPORTS_NARROW_BURST <value>,READ_WRITE_MODE <value>,BUSER_WIDTH <value>,RUSER_WIDTH <value>,WUSER_WIDTH <value>,ARUSER_WIDTH <value>,AWUSER_WIDTH <value>,ADDR_WIDTH <value>,ID_WIDTH <value>,FREQ_HZ <value>,PROTOCOL <value>,DATA_WIDTH <value>,HAS_BURST <value>,HAS_CACHE <value>,HAS_LOCK <value>,HAS_PROT <value>,HAS_QOS <value>,HAS_REGION <value>,HAS_WSTRB <value>,HAS_BRESP <value>,HAS_RRESP <value>" *)
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWID" *)
-    input  wire [    ID_WIDTH-1:0] snoop_awid,        // Write address ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWADDR" *)
-    input  wire [  ADDR_WIDTH-1:0] snoop_awaddr,      // Write address
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWLEN" *)
-    input  wire [   BURST_LEN-1:0] snoop_awlen,       // Burst length
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWSIZE" *)
-    input  wire [             2:0] snoop_awsize,      // Burst size
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWBURST" *)
-    input  wire [             1:0] snoop_awburst,     // Burst type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWLOCK" *)
-    input  wire [  LOCK_WIDTH-1:0] snoop_awlock,      // Lock type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWCACHE" *)
-    input  wire [             3:0] snoop_awcache,     // Cache type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWPROT" *)
-    input  wire [             2:0] snoop_awprot,      // Protection type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWREGION" *)
-    input  wire [             3:0] snoop_awregion,    // Write address slave region
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWQOS" *)
-    input  wire [             3:0] snoop_awqos,       // Transaction Quality of Service token
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWUSER" *)
-    input  wire [  USER_WIDTH-1:0] snoop_awuser,      // Write address user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWVALID" *)
-    input  wire                    snoop_awvalid,     // Write address valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI AWREADY" *)
-    output wire                    snoop_awready,     // Write address ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WID" *)
-    input  wire [    ID_WIDTH-1:0] snoop_wid,         // Write ID tag
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WDATA" *)
-    input  wire [  DATA_WIDTH-1:0] snoop_wdata,       // Write data
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WSTRB" *)
-    input  wire [DATA_WIDTH/8-1:0] snoop_wstrb,       // Write strobes
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WLAST" *)
-    input  wire                    snoop_wlast,       // Write last beat
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WUSER" *)
-    input  wire [  USER_WIDTH-1:0] snoop_wuser,       // Write data user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WVALID" *)
-    input  wire                    snoop_wvalid,      // Write valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI WREADY" *)
-    output wire                    snoop_wready,      // Write ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI BID" *)
-    output wire [    ID_WIDTH-1:0] snoop_bid,         // Response ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI BRESP" *)
-    output wire [             1:0] snoop_bresp,       // Write response
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI BUSER" *)
-    output wire [  USER_WIDTH-1:0] snoop_buser,       // Write response user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI BVALID" *)
-    output wire                    snoop_bvalid,      // Write response valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI BREADY" *)
-    input  wire                    snoop_bready,      // Write response ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARID" *)
-    input  wire [    ID_WIDTH-1:0] snoop_arid,        // Read address ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARADDR" *)
-    input  wire [  ADDR_WIDTH-1:0] snoop_araddr,      // Read address
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARLEN" *)
-    input  wire [   BURST_LEN-1:0] snoop_arlen,       // Burst length
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARSIZE" *)
-    input  wire [             2:0] snoop_arsize,      // Burst size
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARBURST" *)
-    input  wire [             1:0] snoop_arburst,     // Burst type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARLOCK" *)
-    input  wire [  LOCK_WIDTH-1:0] snoop_arlock,      // Lock type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARCACHE" *)
-    input  wire [             3:0] snoop_arcache,     // Cache type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARPROT" *)
-    input  wire [             2:0] snoop_arprot,      // Protection type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARREGION" *)
-    input  wire [             3:0] snoop_arregion,    // Read address slave region
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARQOS" *)
-    input  wire [             3:0] snoop_arqos,       // Quality of service token
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARUSER" *)
-    input  wire [  USER_WIDTH-1:0] snoop_aruser,      // Read address user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARVALID" *)
-    input  wire                    snoop_arvalid,     // Read address valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI ARREADY" *)
-    output wire                    snoop_arready,     // Read address ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RID" *)
-    output wire [    ID_WIDTH-1:0] snoop_rid,         // Read ID tag
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RDATA" *)
-    output wire [  DATA_WIDTH-1:0] snoop_rdata,       // Read data
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RRESP" *)
-    output wire [             1:0] snoop_rresp,       // Read response
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RLAST" *)
-    output wire                    snoop_rlast,       // Read last beat
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RUSER" *)
-    output wire [  USER_WIDTH-1:0] snoop_ruser,       // Read user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RVALID" *)
-    output wire                    snoop_rvalid,      // Read valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 SNOOP_AXI RREADY" *)
-    input  wire                    snoop_rready,      // Read ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWID" *)
+    input  wire [    ID_WIDTH-1:0] AXIS_awid,      // Write address ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWADDR" *)
+    input  wire [  ADDR_WIDTH-1:0] AXIS_awaddr,    // Write address
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWLEN" *)
+    input  wire [   BURST_LEN-1:0] AXIS_awlen,     // Burst length
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWSIZE" *)
+    input  wire [             2:0] AXIS_awsize,    // Burst size
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWBURST" *)
+    input  wire [             1:0] AXIS_awburst,   // Burst type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWLOCK" *)
+    input  wire [  LOCK_WIDTH-1:0] AXIS_awlock,    // Lock type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWCACHE" *)
+    input  wire [             3:0] AXIS_awcache,   // Cache type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWPROT" *)
+    input  wire [             2:0] AXIS_awprot,    // Protection type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWREGION" *)
+    input  wire [             3:0] AXIS_awregion,  // Write address slave region
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWQOS" *)
+    input  wire [             3:0] AXIS_awqos,     // Transaction Quality of Service token
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWUSER" *)
+    input  wire [  USER_WIDTH-1:0] AXIS_awuser,    // Write address user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWVALID" *)
+    input  wire                    AXIS_awvalid,   // Write address valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS AWREADY" *)
+    output wire                    AXIS_awready,   // Write address ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WID" *)
+    input  wire [    ID_WIDTH-1:0] AXIS_wid,       // Write ID tag
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WDATA" *)
+    input  wire [  DATA_WIDTH-1:0] AXIS_wdata,     // Write data
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WSTRB" *)
+    input  wire [DATA_WIDTH/8-1:0] AXIS_wstrb,     // Write strobes
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WLAST" *)
+    input  wire                    AXIS_wlast,     // Write last beat
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WUSER" *)
+    input  wire [  USER_WIDTH-1:0] AXIS_wuser,     // Write data user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WVALID" *)
+    input  wire                    AXIS_wvalid,    // Write valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS WREADY" *)
+    output wire                    AXIS_wready,    // Write ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS BID" *)
+    output wire [    ID_WIDTH-1:0] AXIS_bid,       // Response ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS BRESP" *)
+    output wire [             1:0] AXIS_bresp,     // Write response
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS BUSER" *)
+    output wire [  USER_WIDTH-1:0] AXIS_buser,     // Write response user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS BVALID" *)
+    output wire                    AXIS_bvalid,    // Write response valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS BREADY" *)
+    input  wire                    AXIS_bready,    // Write response ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARID" *)
+    input  wire [    ID_WIDTH-1:0] AXIS_arid,      // Read address ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARADDR" *)
+    input  wire [  ADDR_WIDTH-1:0] AXIS_araddr,    // Read address
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARLEN" *)
+    input  wire [   BURST_LEN-1:0] AXIS_arlen,     // Burst length
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARSIZE" *)
+    input  wire [             2:0] AXIS_arsize,    // Burst size
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARBURST" *)
+    input  wire [             1:0] AXIS_arburst,   // Burst type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARLOCK" *)
+    input  wire [  LOCK_WIDTH-1:0] AXIS_arlock,    // Lock type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARCACHE" *)
+    input  wire [             3:0] AXIS_arcache,   // Cache type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARPROT" *)
+    input  wire [             2:0] AXIS_arprot,    // Protection type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARREGION" *)
+    input  wire [             3:0] AXIS_arregion,  // Read address slave region
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARQOS" *)
+    input  wire [             3:0] AXIS_arqos,     // Quality of service token
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARUSER" *)
+    input  wire [  USER_WIDTH-1:0] AXIS_aruser,    // Read address user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARVALID" *)
+    input  wire                    AXIS_arvalid,   // Read address valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS ARREADY" *)
+    output wire                    AXIS_arready,   // Read address ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RID" *)
+    output wire [    ID_WIDTH-1:0] AXIS_rid,       // Read ID tag
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RDATA" *)
+    output wire [  DATA_WIDTH-1:0] AXIS_rdata,     // Read data
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RRESP" *)
+    output wire [             1:0] AXIS_rresp,     // Read response
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RLAST" *)
+    output wire                    AXIS_rlast,     // Read last beat
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RUSER" *)
+    output wire [  USER_WIDTH-1:0] AXIS_ruser,     // Read user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RVALID" *)
+    output wire                    AXIS_rvalid,    // Read valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIS RREADY" *)
+    input  wire                    AXIS_rready,    // Read ready
     // AXI master (output wire) Interface, will forward the snooped transaction to destination
     // Uncomment the following to set interface specific parameter on the bus interface.
     //  (* X_INTERFACE_PARAMETER = "CLK_DOMAIN <value>,PHASE <value>,MAX_BURST_LENGTH <value>,NUM_WRITE_OUTSTANDING <value>,NUM_READ_OUTSTANDING <value>,SUPPORTS_NARROW_BURST <value>,READ_WRITE_MODE <value>,BUSER_WIDTH <value>,RUSER_WIDTH <value>,WUSER_WIDTH <value>,ARUSER_WIDTH <value>,AWUSER_WIDTH <value>,ADDR_WIDTH <value>,ID_WIDTH <value>,FREQ_HZ <value>,PROTOCOL <value>,DATA_WIDTH <value>,HAS_BURST <value>,HAS_CACHE <value>,HAS_LOCK <value>,HAS_PROT <value>,HAS_QOS <value>,HAS_REGION <value>,HAS_WSTRB <value>,HAS_BRESP <value>,HAS_RRESP <value>" *)
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWID" *)
-    output wire [    ID_WIDTH-1:0] forward_awid,      // Write address ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWADDR" *)
-    output wire [  ADDR_WIDTH-1:0] forward_awaddr,    // Write address
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWLEN" *)
-    output wire [   BURST_LEN-1:0] forward_awlen,     // Burst length
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWSIZE" *)
-    output wire [             2:0] forward_awsize,    // Burst size
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWBURST" *)
-    output wire [             1:0] forward_awburst,   // Burst type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWLOCK" *)
-    output wire [  LOCK_WIDTH-1:0] forward_awlock,    // Lock type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWCACHE" *)
-    output wire [             3:0] forward_awcache,   // Cache type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWPROT" *)
-    output wire [             2:0] forward_awprot,    // Protection type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWREGION" *)
-    output wire [             3:0] forward_awregion,  // Write address slave region
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWQOS" *)
-    output wire [             3:0] forward_awqos,     // Transaction Quality of Service token
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWUSER" *)
-    output wire [  USER_WIDTH-1:0] forward_awuser,    // Write address user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWVALID" *)
-    output wire                    forward_awvalid,   // Write address valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI AWREADY" *)
-    input  wire                    forward_awready,   // Write address ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WID" *)
-    output wire [    ID_WIDTH-1:0] forward_wid,       // Write ID tag
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WDATA" *)
-    output wire [  DATA_WIDTH-1:0] forward_wdata,     // Write data
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WSTRB" *)
-    output wire [DATA_WIDTH/8-1:0] forward_wstrb,     // Write strobes
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WLAST" *)
-    output wire                    forward_wlast,     // Write last beat
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WUSER" *)
-    output wire [  USER_WIDTH-1:0] forward_wuser,     // Write data user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WVALID" *)
-    output wire                    forward_wvalid,    // Write valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI WREADY" *)
-    input  wire                    forward_wready,    // Write ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI BID" *)
-    input  wire [    ID_WIDTH-1:0] forward_bid,       // Response ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI BRESP" *)
-    input  wire [             1:0] forward_bresp,     // Write response
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI BUSER" *)
-    input  wire [  USER_WIDTH-1:0] forward_buser,     // Write response user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI BVALID" *)
-    input  wire                    forward_bvalid,    // Write response valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI BREADY" *)
-    output wire                    forward_bready,    // Write response ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARID" *)
-    output wire [    ID_WIDTH-1:0] forward_arid,      // Read address ID
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARADDR" *)
-    output wire [  ADDR_WIDTH-1:0] forward_araddr,    // Read address
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARLEN" *)
-    output wire [   BURST_LEN-1:0] forward_arlen,     // Burst length
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARSIZE" *)
-    output wire [             2:0] forward_arsize,    // Burst size
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARBURST" *)
-    output wire [             1:0] forward_arburst,   // Burst type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARLOCK" *)
-    output wire [  LOCK_WIDTH-1:0] forward_arlock,    // Lock type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARCACHE" *)
-    output wire [             3:0] forward_arcache,   // Cache type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARPROT" *)
-    output wire [             2:0] forward_arprot,    // Protection type
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARREGION" *)
-    output wire [             3:0] forward_arregion,  // Read address slave region
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARQOS" *)
-    output wire [             3:0] forward_arqos,     // Quality of service token
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARUSER" *)
-    output wire [  USER_WIDTH-1:0] forward_aruser,    // Read address user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARVALID" *)
-    output wire                    forward_arvalid,   // Read address valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI ARREADY" *)
-    input  wire                    forward_arready,   // Read address ready
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RID" *)
-    input  wire [    ID_WIDTH-1:0] forward_rid,       // Read ID tag
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RDATA" *)
-    input  wire [  DATA_WIDTH-1:0] forward_rdata,     // Read data
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RRESP" *)
-    input  wire [             1:0] forward_rresp,     // Read response
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RLAST" *)
-    input  wire                    forward_rlast,     // Read last beat
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RUSER" *)
-    input  wire [  USER_WIDTH-1:0] forward_ruser,     // Read user sideband
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RVALID" *)
-    input  wire                    forward_rvalid,    // Read valid
-    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 FORWARD_AXI RREADY" *)
-    output wire                    forward_rready,    // Read ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWID" *)
+    output wire [    ID_WIDTH-1:0] AXIM_awid,      // Write address ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWADDR" *)
+    output wire [  ADDR_WIDTH-1:0] AXIM_awaddr,    // Write address
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWLEN" *)
+    output wire [   BURST_LEN-1:0] AXIM_awlen,     // Burst length
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWSIZE" *)
+    output wire [             2:0] AXIM_awsize,    // Burst size
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWBURST" *)
+    output wire [             1:0] AXIM_awburst,   // Burst type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWLOCK" *)
+    output wire [  LOCK_WIDTH-1:0] AXIM_awlock,    // Lock type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWCACHE" *)
+    output wire [             3:0] AXIM_awcache,   // Cache type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWPROT" *)
+    output wire [             2:0] AXIM_awprot,    // Protection type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWREGION" *)
+    output wire [             3:0] AXIM_awregion,  // Write address slave region
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWQOS" *)
+    output wire [             3:0] AXIM_awqos,     // Transaction Quality of Service token
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWUSER" *)
+    output wire [  USER_WIDTH-1:0] AXIM_awuser,    // Write address user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWVALID" *)
+    output wire                    AXIM_awvalid,   // Write address valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM AWREADY" *)
+    input  wire                    AXIM_awready,   // Write address ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WID" *)
+    output wire [    ID_WIDTH-1:0] AXIM_wid,       // Write ID tag
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WDATA" *)
+    output wire [  DATA_WIDTH-1:0] AXIM_wdata,     // Write data
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WSTRB" *)
+    output wire [DATA_WIDTH/8-1:0] AXIM_wstrb,     // Write strobes
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WLAST" *)
+    output wire                    AXIM_wlast,     // Write last beat
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WUSER" *)
+    output wire [  USER_WIDTH-1:0] AXIM_wuser,     // Write data user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WVALID" *)
+    output wire                    AXIM_wvalid,    // Write valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM WREADY" *)
+    input  wire                    AXIM_wready,    // Write ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM BID" *)
+    input  wire [    ID_WIDTH-1:0] AXIM_bid,       // Response ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM BRESP" *)
+    input  wire [             1:0] AXIM_bresp,     // Write response
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM BUSER" *)
+    input  wire [  USER_WIDTH-1:0] AXIM_buser,     // Write response user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM BVALID" *)
+    input  wire                    AXIM_bvalid,    // Write response valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM BREADY" *)
+    output wire                    AXIM_bready,    // Write response ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARID" *)
+    output wire [    ID_WIDTH-1:0] AXIM_arid,      // Read address ID
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARADDR" *)
+    output wire [  ADDR_WIDTH-1:0] AXIM_araddr,    // Read address
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARLEN" *)
+    output wire [   BURST_LEN-1:0] AXIM_arlen,     // Burst length
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARSIZE" *)
+    output wire [             2:0] AXIM_arsize,    // Burst size
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARBURST" *)
+    output wire [             1:0] AXIM_arburst,   // Burst type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARLOCK" *)
+    output wire [  LOCK_WIDTH-1:0] AXIM_arlock,    // Lock type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARCACHE" *)
+    output wire [             3:0] AXIM_arcache,   // Cache type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARPROT" *)
+    output wire [             2:0] AXIM_arprot,    // Protection type
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARREGION" *)
+    output wire [             3:0] AXIM_arregion,  // Read address slave region
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARQOS" *)
+    output wire [             3:0] AXIM_arqos,     // Quality of service token
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARUSER" *)
+    output wire [  USER_WIDTH-1:0] AXIM_aruser,    // Read address user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARVALID" *)
+    output wire                    AXIM_arvalid,   // Read address valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM ARREADY" *)
+    input  wire                    AXIM_arready,   // Read address ready
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RID" *)
+    input  wire [    ID_WIDTH-1:0] AXIM_rid,       // Read ID tag
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RDATA" *)
+    input  wire [  DATA_WIDTH-1:0] AXIM_rdata,     // Read data
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RRESP" *)
+    input  wire [             1:0] AXIM_rresp,     // Read response
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RLAST" *)
+    input  wire                    AXIM_rlast,     // Read last beat
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RUSER" *)
+    input  wire [  USER_WIDTH-1:0] AXIM_ruser,     // Read user sideband
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RVALID" *)
+    input  wire                    AXIM_rvalid,    // Read valid
+    (* X_INTERFACE_INFO = "xilinx.com:interface:aximm:1.0 AXIM RREADY" *)
+    output wire                    AXIM_rready,    // Read ready
     // AXI stream Master (stream input wire) interface
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TID" *)
     // Uncomment the following to set interface specific parameter on the bus interface.
     //  (* X_INTERFACE_PARAMETER = "CLK_DOMAIN <value>,PHASE <value>,FREQ_HZ <value>,LAYERED_METADATA <value>,HAS_TLAST <value>,HAS_TKEEP <value>,HAS_TSTRB <value>,HAS_TREADY <value>,TUSER_WIDTH <value>,TID_WIDTH <value>,TDEST_WIDTH <value>,TDATA_NUM_BYTES <value>" *)
-    output wire [    ID_WIDTH-1:0] stream_tid,        // Transfer ID tag (optional)
+    output wire [    ID_WIDTH-1:0] stream_tid,     // Transfer ID tag (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TDEST" *)
-    output wire [  DEST_WIDTH-1:0] stream_tdest,      // Transfer Destination (optional)
+    output wire [  DEST_WIDTH-1:0] stream_tdest,   // Transfer Destination (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TDATA" *)
-    output wire [  DATA_WIDTH-1:0] stream_tdata,      // Transfer Data (optional)
+    output wire [  DATA_WIDTH-1:0] stream_tdata,   // Transfer Data (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TSTRB" *)
-    output wire [DATA_WIDTH/8-1:0] stream_tstrb,      // Transfer Data Byte Strobes (optional)
+    output wire [DATA_WIDTH/8-1:0] stream_tstrb,   // Transfer Data Byte Strobes (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TKEEP" *)
-    output wire [DATA_WIDTH/8-1:0] stream_tkeep,      // Transfer Null Byte Indicators (optional)
+    output wire [DATA_WIDTH/8-1:0] stream_tkeep,   // Transfer Null Byte Indicators (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TLAST" *)
-    output wire                    stream_tlast,      // Packet Boundary Indicator (optional)
+    output wire                    stream_tlast,   // Packet Boundary Indicator (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TUSER" *)
-    output wire [  USER_WIDTH-1:0] stream_tuser,      // Transfer user sideband (optional)
+    output wire [  USER_WIDTH-1:0] stream_tuser,   // Transfer user sideband (optional)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TVALID" *)
-    output wire                    stream_tvalid,     // Transfer valid (required)
+    output wire                    stream_tvalid,  // Transfer valid (required)
     (* X_INTERFACE_INFO = "xilinx.com:interface:axis:1.0 STREAM_AXI TREADY" *)
-    input  wire                    stream_tready,     // Transfer ready (optional)
+    input  wire                    stream_tready,  // Transfer ready (optional)
 
-    output wire DBG_can_forwardAR,
-    output wire DBG_can_forwardAW,
-    output wire DBG_can_forwardR,
-    output wire DBG_can_forwardW,
-    output wire DBG_can_forwardB
+    // reset params
+    input wire RESETN_AR,
+    input wire RESETN_AW,
+    input wire RESETN_R,
+    input wire RESETN_W,
+    input wire RESETN_B
 );
 
   AXIToStream #(
       .DATA_WIDTH(DATA_WIDTH),
       .ADDR_WIDTH(ADDR_WIDTH),
-      .ID_WIDTH(BURST_LEN),
+      .ID_WIDTH  (BURST_LEN),
       .LOCK_WIDTH(LOCK_WIDTH),
-      .USER_WIDTH(USER_WIDTH),
-      .STREAM_TYPE_WIDTH(STREAM_TYPE_WIDTH)
+      .USER_WIDTH(USER_WIDTH)
   ) axi_to_stream (
       .clk(clk),
       .resetn(resetn),
-      .snoop_araddr(snoop_araddr),
-      .snoop_arburst(snoop_arburst),
-      .snoop_arcache(snoop_arcache),
-      .snoop_arid(snoop_arid),
-      .snoop_arlen(snoop_arlen),
-      .snoop_arlock(snoop_arlock),
-      .snoop_arprot(snoop_arprot),
-      .snoop_arqos(snoop_arqos),
-      .snoop_arready(snoop_arready),
-      .snoop_arregion(snoop_arregion),
-      .snoop_arsize(snoop_arsize),
-      .snoop_aruser(snoop_aruser),
-      .snoop_arvalid(snoop_arvalid),
+      .RESETN_AR(RESETN_AR),
+      .RESETN_AW(RESETN_AW),
+      .RESETN_R(RESETN_R),
+      .RESETN_W(RESETN_W),
+      .RESETN_B(RESETN_B),
+      .AXIS_araddr(AXIS_araddr),
+      .AXIS_arburst(AXIS_arburst),
+      .AXIS_arcache(AXIS_arcache),
+      .AXIS_arid(AXIS_arid),
+      .AXIS_arlen(AXIS_arlen),
+      .AXIS_arlock(AXIS_arlock),
+      .AXIS_arprot(AXIS_arprot),
+      .AXIS_arqos(AXIS_arqos),
+      .AXIS_arready(AXIS_arready),
+      .AXIS_arregion(AXIS_arregion),
+      .AXIS_arsize(AXIS_arsize),
+      .AXIS_aruser(AXIS_aruser),
+      .AXIS_arvalid(AXIS_arvalid),
 
-      .snoop_rdata(snoop_rdata),
-      .snoop_rid(snoop_rid),
-      .snoop_rlast(snoop_rlast),
-      .snoop_rready(snoop_rready),
-      .snoop_rresp(snoop_rresp),
-      .snoop_ruser(snoop_ruser),
-      .snoop_rvalid(snoop_rvalid),
+      .AXIS_rdata(AXIS_rdata),
+      .AXIS_rid(AXIS_rid),
+      .AXIS_rlast(AXIS_rlast),
+      .AXIS_rready(AXIS_rready),
+      .AXIS_rresp(AXIS_rresp),
+      .AXIS_ruser(AXIS_ruser),
+      .AXIS_rvalid(AXIS_rvalid),
 
-      .snoop_awaddr(snoop_awaddr),
-      .snoop_awburst(snoop_awburst),
-      .snoop_awcache(snoop_awcache),
-      .snoop_awid(snoop_awid),
-      .snoop_awlen(snoop_awlen),
-      .snoop_awlock(snoop_awlock),
-      .snoop_awprot(snoop_awprot),
-      .snoop_awqos(snoop_awqos),
-      .snoop_awready(snoop_awready),
-      .snoop_awregion(snoop_awregion),
-      .snoop_awsize(snoop_awsize),
-      .snoop_awuser(snoop_awuser),
-      .snoop_awvalid(snoop_awvalid),
+      .AXIS_awaddr(AXIS_awaddr),
+      .AXIS_awburst(AXIS_awburst),
+      .AXIS_awcache(AXIS_awcache),
+      .AXIS_awid(AXIS_awid),
+      .AXIS_awlen(AXIS_awlen),
+      .AXIS_awlock(AXIS_awlock),
+      .AXIS_awprot(AXIS_awprot),
+      .AXIS_awqos(AXIS_awqos),
+      .AXIS_awready(AXIS_awready),
+      .AXIS_awregion(AXIS_awregion),
+      .AXIS_awsize(AXIS_awsize),
+      .AXIS_awuser(AXIS_awuser),
+      .AXIS_awvalid(AXIS_awvalid),
 
-      .snoop_wdata(snoop_wdata),
-      .snoop_wid(snoop_wid),
-      .snoop_wlast(snoop_wlast),
-      .snoop_wready(snoop_wready),
-      .snoop_wstrb(snoop_wstrb),
-      .snoop_wuser(snoop_wuser),
-      .snoop_wvalid(snoop_wvalid),
+      .AXIS_wdata(AXIS_wdata),
+      .AXIS_wid(AXIS_wid),
+      .AXIS_wlast(AXIS_wlast),
+      .AXIS_wready(AXIS_wready),
+      .AXIS_wstrb(AXIS_wstrb),
+      .AXIS_wuser(AXIS_wuser),
+      .AXIS_wvalid(AXIS_wvalid),
 
-      .snoop_bid(snoop_bid),
-      .snoop_bready(snoop_bready),
-      .snoop_bresp(snoop_bresp),
-      .snoop_buser(snoop_buser),
-      .snoop_bvalid(snoop_bvalid),
+      .AXIS_bid(AXIS_bid),
+      .AXIS_bready(AXIS_bready),
+      .AXIS_bresp(AXIS_bresp),
+      .AXIS_buser(AXIS_buser),
+      .AXIS_bvalid(AXIS_bvalid),
 
-      .forward_araddr(forward_araddr),
-      .forward_arburst(forward_arburst),
-      .forward_arcache(forward_arcache),
-      .forward_arid(forward_arid),
-      .forward_arlen(forward_arlen),
-      .forward_arlock(forward_arlock),
-      .forward_arprot(forward_arprot),
-      .forward_arqos(forward_arqos),
-      .forward_arready(forward_arready),
-      .forward_arregion(forward_arregion),
-      .forward_arsize(forward_arsize),
-      .forward_aruser(forward_aruser),
-      .forward_arvalid(forward_arvalid),
+      .AXIM_araddr(AXIM_araddr),
+      .AXIM_arburst(AXIM_arburst),
+      .AXIM_arcache(AXIM_arcache),
+      .AXIM_arid(AXIM_arid),
+      .AXIM_arlen(AXIM_arlen),
+      .AXIM_arlock(AXIM_arlock),
+      .AXIM_arprot(AXIM_arprot),
+      .AXIM_arqos(AXIM_arqos),
+      .AXIM_arready(AXIM_arready),
+      .AXIM_arregion(AXIM_arregion),
+      .AXIM_arsize(AXIM_arsize),
+      .AXIM_aruser(AXIM_aruser),
+      .AXIM_arvalid(AXIM_arvalid),
 
-      .forward_rdata(forward_rdata),
-      .forward_rid(forward_rid),
-      .forward_rlast(forward_rlast),
-      .forward_rready(forward_rready),
-      .forward_rresp(forward_rresp),
-      .forward_ruser(forward_ruser),
-      .forward_rvalid(forward_rvalid),
+      .AXIM_rdata(AXIM_rdata),
+      .AXIM_rid(AXIM_rid),
+      .AXIM_rlast(AXIM_rlast),
+      .AXIM_rready(AXIM_rready),
+      .AXIM_rresp(AXIM_rresp),
+      .AXIM_ruser(AXIM_ruser),
+      .AXIM_rvalid(AXIM_rvalid),
 
-      .forward_awaddr(forward_awaddr),
-      .forward_awburst(forward_awburst),
-      .forward_awcache(forward_awcache),
-      .forward_awid(forward_awid),
-      .forward_awlen(forward_awlen),
-      .forward_awlock(forward_awlock),
-      .forward_awprot(forward_awprot),
-      .forward_awqos(forward_awqos),
-      .forward_awready(forward_awready),
-      .forward_awregion(forward_awregion),
-      .forward_awsize(forward_awsize),
-      .forward_awuser(forward_awuser),
-      .forward_awvalid(forward_awvalid),
+      .AXIM_awaddr(AXIM_awaddr),
+      .AXIM_awburst(AXIM_awburst),
+      .AXIM_awcache(AXIM_awcache),
+      .AXIM_awid(AXIM_awid),
+      .AXIM_awlen(AXIM_awlen),
+      .AXIM_awlock(AXIM_awlock),
+      .AXIM_awprot(AXIM_awprot),
+      .AXIM_awqos(AXIM_awqos),
+      .AXIM_awready(AXIM_awready),
+      .AXIM_awregion(AXIM_awregion),
+      .AXIM_awsize(AXIM_awsize),
+      .AXIM_awuser(AXIM_awuser),
+      .AXIM_awvalid(AXIM_awvalid),
 
-      .forward_wdata(forward_wdata),
-      .forward_wid(forward_wid),
-      .forward_wlast(forward_wlast),
-      .forward_wready(forward_wready),
-      .forward_wstrb(forward_wstrb),
-      .forward_wuser(forward_wuser),
-      .forward_wvalid(forward_wvalid),
+      .AXIM_wdata(AXIM_wdata),
+      .AXIM_wid(AXIM_wid),
+      .AXIM_wlast(AXIM_wlast),
+      .AXIM_wready(AXIM_wready),
+      .AXIM_wstrb(AXIM_wstrb),
+      .AXIM_wuser(AXIM_wuser),
+      .AXIM_wvalid(AXIM_wvalid),
 
-      .forward_bid(forward_bid),
-      .forward_bready(forward_bready),
-      .forward_bresp(forward_bresp),
-      .forward_buser(forward_buser),
-      .forward_bvalid(forward_bvalid),
+      .AXIM_bid(AXIM_bid),
+      .AXIM_bready(AXIM_bready),
+      .AXIM_bresp(AXIM_bresp),
+      .AXIM_buser(AXIM_buser),
+      .AXIM_bvalid(AXIM_bvalid),
 
       .stream_tdata(stream_tdata),
       .stream_tdest(stream_tdest),
@@ -349,14 +353,7 @@ module AXIToStream_wrapper #(
       .stream_tready(stream_tready),
       .stream_tstrb(stream_tstrb),
       .stream_tuser(stream_tuser),
-      .stream_tvalid(stream_tvalid),
-
-
-      .DBG_can_forwardAR(DBG_can_forwardAR),
-      .DBG_can_forwardAW(DBG_can_forwardAW),
-      .DBG_can_forwardR(DBG_can_forwardR),
-      .DBG_can_forwardW(DBG_can_forwardW),
-      .DBG_can_forwardB(DBG_can_forwardB)
+      .stream_tvalid(stream_tvalid)
   );
 
 endmodule

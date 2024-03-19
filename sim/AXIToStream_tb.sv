@@ -28,11 +28,18 @@ import AXIToStream_test_axi_vip_1_0_pkg::*;
 module AXIToStream_tb ();
 
   bit clk, resetn;
+  parameter channels = 5;
+  bit [channels-1:0] RESETS;
 
   //Instantiate the laock design wrapper and connect external pins
   AXIToStream_test_wrapper #() ats_test (
       .aclk_0(clk),
-      .aresetn_0(resetn)
+      .aresetn_0(resetn),
+      .RESETN_AR_0(RESETS[0]),
+      .RESETN_AW_0(RESETS[1]),
+      .RESETN_R_0(RESETS[2]),
+      .RESETN_W_0(RESETS[3]),
+      .RESETN_B_0(RESETS[4])
 
   );
 
@@ -47,10 +54,12 @@ module AXIToStream_tb ();
 
   // Generate a clock signal
   always #5ns clk <= ~clk;
+  integer i;
 
   // start the simulation
   initial begin
     // Reset all modules
+    RESETS = {channels{1'b0}};
     resetn <= 0;
     // @bug vivado 2019.2 complains the reset signal is asserted after 20ns
     #10ns;
@@ -83,38 +92,45 @@ module AXIToStream_tb ();
     master_agent.start_master();
     slave_agent.start_slave();
     stream_slave_agent.start_slave();
+    for (i = 0; i <= channels; i++) begin
+      if (i < channels) begin
+        RESETS = {channels{1'b0}};
+        RESETS[i] = 1;
+      end else begin
+        RESETS = {channels{1'b1}};
+      end
+      $display("iteration number %d", i);
+      // The master creates a random write transaction
+      wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
+      assert (wr_transaction.randomize());
 
-    // The master creates a random write transaction
-    wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
-    assert (wr_transaction.randomize());
+      // The master creates a random read transaction
+      rd_transaction = master_agent.rd_driver.create_transaction("read transaction");
+      assert (rd_transaction.randomize());
 
-    // The master creates a random read transaction
-    rd_transaction = master_agent.rd_driver.create_transaction("read transaction");
-    assert (rd_transaction.randomize());
+      // We send the read transaction
+      master_agent.rd_driver.send(rd_transaction);
+      // The stream slave generates a ready signal otherwise we will be stuck forever
+      stream_slave_agent.driver.send_tready(ready_gen);
+      // We send the write transaction
+      // master_agent.wr_driver.send(wr_transaction);
+      // And like before, we make the slave accept the transaction
+      //stream_slave_agent.driver.send_tready(ready_gen);
 
-    // We send the read transaction
-    master_agent.rd_driver.send(rd_transaction);
-    // The stream slave generates a ready signal otherwise we will be stuck forever
-    stream_slave_agent.driver.send_tready(ready_gen);
-    // We send the write transaction
-    // master_agent.wr_driver.send(wr_transaction);
-    // And like before, we make the slave accept the transaction
-    //stream_slave_agent.driver.send_tready(ready_gen);
+      // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
+      master_agent.wait_drivers_idle();
+      //@todo: reset only the streaming module and check if transactions still go trough
+      master_agent.wr_driver.send(wr_transaction);
 
-    // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
-    master_agent.wait_drivers_idle();
-    //@todo: reset only the streaming module and check if transactions still go trough
-    master_agent.wr_driver.send(wr_transaction);
-    
-    stream_slave_agent.driver.send_tready(ready_gen);
-    
-    assert (rd_transaction.randomize());
+      stream_slave_agent.driver.send_tready(ready_gen);
 
-    // We send the read transaction
-    master_agent.rd_driver.send(rd_transaction);
-    
-    master_agent.wait_drivers_idle();
-    //$finish;
+      assert (rd_transaction.randomize());
+
+      // We send the read transaction
+      master_agent.rd_driver.send(rd_transaction);
+
+      master_agent.wait_drivers_idle();
+    end
+    $finish;
   end
-
 endmodule

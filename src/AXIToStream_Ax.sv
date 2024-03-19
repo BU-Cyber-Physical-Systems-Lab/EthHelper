@@ -81,7 +81,7 @@ module AXIToStream_Ax #(
   assign AXIM_axvalid = AXIS_axvalid && (~resetn || ready);
   assign AXIS_axready = AXIM_axready && (~resetn || ready);
   //out data is valid only when there is a handshake and we are not in reset state
-  assign valid = resetn && AXIM_axvalid && AXIS_axready;
+  assign valid = resetn && AXIS_axvalid && AXIM_axready;
   // these transaction need only one clock cycle to be completed, so we are in progress only when the input is valid
   assign in_progress = valid;
   assign last = ready && valid;
