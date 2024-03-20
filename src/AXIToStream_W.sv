@@ -110,7 +110,8 @@ module AXIToStream_W #(
   always @(posedge clk) begin
     if (valid & ready) begin
       if (state == METADATA) begin
-        state <= DATA;
+        state   <= DATA;
+        strobes <= 0;
       end else if (state == DATA) begin
         //we accumulate strobes in the strobes register
         strobes <= {strobes[(BURST_SIZE-1)*DATA_WIDTH/8-1:0], AXIS_wstrb};
@@ -118,10 +119,12 @@ module AXIToStream_W #(
           state <= STROBE;
         end
       end else if (state == STROBE) begin
-        state <= METADATA;
+        state   <= METADATA;
+        strobes <= 0;
       end
     end else begin
-      state <= METADATA;
+      state   <= METADATA;
+      strobes <= 0;
     end
   end
 

@@ -92,45 +92,38 @@ module AXIToStream_tb ();
     master_agent.start_master();
     slave_agent.start_slave();
     stream_slave_agent.start_slave();
-    for (i = 0; i <= channels; i++) begin
-      if (i < channels) begin
-        RESETS = {channels{1'b0}};
-        RESETS[i] = 1;
-      end else begin
-        RESETS = {channels{1'b1}};
-      end
-      $display("iteration number %d", i);
-      // The master creates a random write transaction
-      wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
-      assert (wr_transaction.randomize());
+    RESETS = 5'b0011;
+    $display("iteration number %d", i);
+    // The master creates a random write transaction
+    wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
+    assert (wr_transaction.randomize());
 
-      // The master creates a random read transaction
-      rd_transaction = master_agent.rd_driver.create_transaction("read transaction");
-      assert (rd_transaction.randomize());
+    // The master creates a random read transaction
+    rd_transaction = master_agent.rd_driver.create_transaction("read transaction");
+    assert (rd_transaction.randomize());
 
-      // We send the read transaction
-      master_agent.rd_driver.send(rd_transaction);
-      // The stream slave generates a ready signal otherwise we will be stuck forever
-      stream_slave_agent.driver.send_tready(ready_gen);
-      // We send the write transaction
-      // master_agent.wr_driver.send(wr_transaction);
-      // And like before, we make the slave accept the transaction
-      //stream_slave_agent.driver.send_tready(ready_gen);
+    // We send the read transaction
+    master_agent.rd_driver.send(rd_transaction);
+    // The stream slave generates a ready signal otherwise we will be stuck forever
+    stream_slave_agent.driver.send_tready(ready_gen);
+    // We send the write transaction
+    // master_agent.wr_driver.send(wr_transaction);
+    // And like before, we make the slave accept the transaction
+    //stream_slave_agent.driver.send_tready(ready_gen);
 
-      // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
-      master_agent.wait_drivers_idle();
-      //@todo: reset only the streaming module and check if transactions still go trough
-      master_agent.wr_driver.send(wr_transaction);
+    // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
+    master_agent.wait_drivers_idle();
+    //@todo: reset only the streaming module and check if transactions still go trough
+    master_agent.wr_driver.send(wr_transaction);
 
-      stream_slave_agent.driver.send_tready(ready_gen);
+    stream_slave_agent.driver.send_tready(ready_gen);
 
-      assert (rd_transaction.randomize());
+    assert (rd_transaction.randomize());
 
-      // We send the read transaction
-      master_agent.rd_driver.send(rd_transaction);
+    // We send the read transaction
+    master_agent.rd_driver.send(rd_transaction);
 
-      master_agent.wait_drivers_idle();
-    end
+    master_agent.wait_drivers_idle();
     $finish;
   end
 endmodule

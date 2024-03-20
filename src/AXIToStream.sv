@@ -17,21 +17,26 @@ module AXIToStream #(
     localparam channels = 5,
     //the bit needed to represent this channels in binary
     localparam channels_bits = $clog2(channels),
+    //maximum channels that can be encoded with channels_bits, might be
+    //different from channels
+    localparam channels_max = 2 ** channels_bits,
 
     /// the ids of the submodules (used in various indexing operations)
-    localparam AR_ID = {channels_bits{1'b0}},
-    localparam AW_ID = {{channels_bits - 1{1'b0}}, 1'b1},
-    localparam R_ID  = {{channels_bits - 2{1'b0}}, 2'b10},
-    localparam W_ID  = {{channels_bits - 2{1'b0}}, 2'b11},
-    localparam B_ID  = {{channels_bits - 3{1'b0}}, 3'b100},
+    localparam AR_ID = {channels_max{1'b0}},
+    localparam AW_ID = {{channels_max - 1{1'b0}}, 1'b1},
+    localparam R_ID = {{channels_max - 2{1'b0}}, 2'b10},
+    localparam W_ID = {{channels_max - 2{1'b0}}, 2'b11},
+    localparam B_ID = {{channels_max - 3{1'b0}}, 3'b100},
+    // the ID of the last valid channel
+    localparam LAST_ID = B_ID,
 
     ///the one-hot encoding of the ready signal
-    localparam NONE_HOT = {channels{1'b0}},  // no channel ready
-    localparam AR_HOT = {{channels - 1{1'b0}}, 1'b1},  // AR ready
-    localparam AW_HOT = {{channels - 2{1'b0}}, 2'b10},  //AW ready
-    localparam R_HOT = {{channels - 3{1'b0}}, 3'b100},  //R ready
-    localparam W_HOT = {{channels - 4{1'b0}}, 4'b1000},  //W ready
-    localparam B_HOT = {{channels - 5{1'b0}}, 5'b10000}  //B ready
+    localparam NONE_HOT = {channels_max{1'b0}},  // no channel ready
+    localparam AR_HOT = {{channels_max - 1{1'b0}}, 1'b1},  // AR ready
+    localparam AW_HOT = {{channels_max - 2{1'b0}}, 2'b10},  //AW ready
+    localparam R_HOT = {{channels_max - 3{1'b0}}, 3'b100},  //R ready
+    localparam W_HOT = {{channels_max - 4{1'b0}}, 4'b1000},  //W ready
+    localparam B_HOT = {{channels_max - 5{1'b0}}, 5'b10000}  //B ready
 
 ) (
     input  wire                    clk,
@@ -356,26 +361,38 @@ module AXIToStream #(
   assign resets[B_ID]  = resetn && RESETN_B;
 
   /// how the top module signals a specific submodule that the transaction can proceed
-  wire [channels-1:0] ready;
+  wire [channels_max-1:0] ready;
   // each submodule has a last signal
-  wire [channels-1:0] last;
+  wire [channels_max-1:0] last;
 
   /// how the submodules will signal to the top module that they have valid data
   /// (after having detected a handshake between the two original axi
   /// interfaces), or a multi-clock cycle transaction is still in progress (e.g.
   /// R/w).
-  wire [channels-1:0] valid, in_progress;
+  wire [channels_max-1:0] valid, in_progress;
+
+  //all the unused channels have their ready,last,valid and in_progress to 0
+  genvar k;
+  generate
+    for (k = LAST_ID + 1; k < channels_max; k++) begin
+      assign valid[k] = 0;
+      assign ready[k] = 0;
+      assign last[k] = 0;
+      assign in_progress[k] = 0;
+    end
+  endgenerate
+
   assign stream_tvalid = |valid;
 
   /// since everything is relative to last_index we need also the one-hot
   /// encoding for the ready to be relative to last_index
-  reg [channels-1:0][channels-1:0] encodings;
+  reg [channels_max-1:0][channels_max-1:0] encodings;
 
   ///finally also the data that we send to the AXI4stream has to be relative to
   ///last_index
   //why is this a 2d array again? was it to have one dimension to index it and
   //the next to have the data
-  wire [channels-1:0][DATA_WIDTH-1:0] submodule_data;
+  wire [channels_max-1:0][DATA_WIDTH-1:0] submodule_data;
 
   ///to implement round robin we need a register that will cycle between all the
   ///possible channels (when they are valid)
@@ -386,12 +403,15 @@ module AXIToStream #(
   // assign the one-hot encodings to the ready signal, in a round robing fashion
   ///this has to unroll to channels-1 amount regardless if the channels are used
   ///@todo is there a way to do this in a neater way?
-  assign ready = (stream_tready && valid[last_index]) ?  encodings[last_index][channels-1:0] :
- ( stream_tready && valid[last_index+1]) ? encodings[last_index+1][channels-1:0] :
- ( stream_tready && valid[last_index+2]) ? encodings[last_index+2][channels-1:0] :
- ( stream_tready && valid[last_index+3]) ? encodings[last_index+3][channels-1:0] :
- ( stream_tready && valid[last_index+4]) ? encodings[last_index+4][channels-1:0] :
- NONE_HOT;//continue for all channels then last else is NONE_HOT;
+  assign ready = (stream_tready && valid[last_index]) ?  encodings[last_index][channels_max-1:0] :
+ ( stream_tready && valid[last_index+1]) ? encodings[last_index+1][channels_max-1:0] :
+ ( stream_tready && valid[last_index+2]) ? encodings[last_index+2][channels_max-1:0] :
+ ( stream_tready && valid[last_index+3]) ? encodings[last_index+3][channels_max-1:0] :
+ ( stream_tready && valid[last_index+4]) ? encodings[last_index+4][channels_max-1:0] :
+ ( stream_tready && valid[last_index+5]) ? encodings[last_index+5][channels_max-1:0] :
+ ( stream_tready && valid[last_index+6]) ? encodings[last_index+6][channels_max-1:0] :
+ ( stream_tready && valid[last_index+7]) ? encodings[last_index+7][channels_max-1:0] :
+ NONE_HOT;//continue for all channels_bits then last else is NONE_HOT;
 
   /// with the same logic as the ready, we send the matching data
   ///this has to unroll to channels-1 amount regardless if the channels are used
@@ -401,7 +421,10 @@ module AXIToStream #(
 (ready[last_index+2] || in_progress[last_index+2]) ? submodule_data[last_index+2][DATA_WIDTH-1:0] :
 (ready[last_index+3] || in_progress[last_index+3]) ? submodule_data[last_index+3][DATA_WIDTH-1:0] :
 (ready[last_index+4] || in_progress[last_index+4]) ? submodule_data[last_index+4][DATA_WIDTH-1:0] :
- 0; //continue for all channels then last else is 0;
+(ready[last_index+5] || in_progress[last_index+5]) ? submodule_data[last_index+5][DATA_WIDTH-1:0] :
+(ready[last_index+6] || in_progress[last_index+6]) ? submodule_data[last_index+6][DATA_WIDTH-1:0] :
+(ready[last_index+7] || in_progress[last_index+7]) ? submodule_data[last_index+7][DATA_WIDTH-1:0] :
+ 0; //continue for all channels_bits then last else is 0;
 
   /// with the same logic as the ready, we choose which last to forward
   ///this has to unroll to channels-1 amount regardless if the channels are used
@@ -411,17 +434,25 @@ module AXIToStream #(
 (ready[last_index+2] || in_progress[last_index+2]) ? last[last_index+2] :
 (ready[last_index+3] || in_progress[last_index+3]) ? last[last_index+3] :
 (ready[last_index+4] || in_progress[last_index+4]) ? last[last_index+4] :
- 0; //continue for all channels then last else is 0;
+(ready[last_index+5] || in_progress[last_index+5]) ? last[last_index+5] :
+(ready[last_index+6] || in_progress[last_index+6]) ? last[last_index+6] :
+(ready[last_index+7] || in_progress[last_index+7]) ? last[last_index+7] :
+ 0; //continue for all channels_bits then last else is 0;
 
   //have the encoding maps always be refreshed in this always block
   //helps separate somewhat static code with the actual logic
   //*NOTE:* use the IDs to index the encodings.
+  integer j;
   always @(posedge clk) begin
     encodings[AR_ID] <= AR_HOT;
     encodings[AW_ID] <= AW_HOT;
     encodings[R_ID]  <= R_HOT;
     encodings[W_ID]  <= W_HOT;
     encodings[B_ID]  <= B_HOT;
+    //if there are unused encodings slots we set them to NONE_HOT
+    for (j = LAST_ID + 1; j < channels_max; j++) begin
+      encodings[j] <= NONE_HOT;
+    end
   end
 
   //Here we need to check all channels
@@ -437,8 +468,8 @@ module AXIToStream #(
 
       // @todo check if increment of last_index wraps properly (unused entries
       // encoded by the channels_bits should be skipped)
-      for (i = 0; i < channels; i++) begin
-        if ((valid[last_index+i] || in_progress[last_index+i])) begin
+      for (i = 0; i < channels_max; i++) begin
+        if (valid[last_index+i] || in_progress[last_index+i]) begin
           last_index <= i + last_index;
           break;
         end
