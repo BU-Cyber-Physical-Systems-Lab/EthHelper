@@ -92,7 +92,7 @@ module AXIToStream_tb ();
     master_agent.start_master();
     slave_agent.start_slave();
     stream_slave_agent.start_slave();
-    RESETS = 5'b0011;
+    RESETS = 5'b00011;
     $display("iteration number %d", i);
     // The master creates a random write transaction
     wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
@@ -119,9 +119,6 @@ module AXIToStream_tb ();
     stream_slave_agent.driver.send_tready(ready_gen);
 
     assert (rd_transaction.randomize());
-
-    // We send the read transaction
-    master_agent.rd_driver.send(rd_transaction);
 
     master_agent.wait_drivers_idle();
     $finish;

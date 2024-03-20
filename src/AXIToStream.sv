@@ -371,6 +371,18 @@ module AXIToStream #(
   /// R/w).
   wire [channels_max-1:0] valid, in_progress;
 
+  assign stream_tvalid = |valid;
+
+  /// since everything is relative to last_index we need also the one-hot
+  /// encoding for the ready to be relative to last_index
+  reg  [channels_max-1:0][channels_max-1:0] encodings;
+
+  ///finally also the data that we send to the AXI4stream has to be relative to
+  ///last_index
+  //why is this a 2d array again? was it to have one dimension to index it and
+  //the next to have the data
+  wire [channels_max-1:0][  DATA_WIDTH-1:0] submodule_data;
+
   //all the unused channels have their ready,last,valid and in_progress to 0
   genvar k;
   generate
@@ -379,20 +391,10 @@ module AXIToStream #(
       assign ready[k] = 0;
       assign last[k] = 0;
       assign in_progress[k] = 0;
+      assign submodule_data[k][DATA_WIDTH-1:0] = 0;
     end
   endgenerate
 
-  assign stream_tvalid = |valid;
-
-  /// since everything is relative to last_index we need also the one-hot
-  /// encoding for the ready to be relative to last_index
-  reg [channels_max-1:0][channels_max-1:0] encodings;
-
-  ///finally also the data that we send to the AXI4stream has to be relative to
-  ///last_index
-  //why is this a 2d array again? was it to have one dimension to index it and
-  //the next to have the data
-  wire [channels_max-1:0][DATA_WIDTH-1:0] submodule_data;
 
   ///to implement round robin we need a register that will cycle between all the
   ///possible channels (when they are valid)

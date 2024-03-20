@@ -104,9 +104,6 @@ module AXIToStream_W #(
       //no handshake, we send noting
       0;
 
-  // we do not have valid data if we are in reset
-  assign valid = resetn && AXIS_wvalid && AXIM_wready;
-
   always @(posedge clk) begin
     if (valid & ready) begin
       if (state == METADATA) begin
