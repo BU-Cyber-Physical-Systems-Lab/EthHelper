@@ -41,12 +41,12 @@ module Dummy_AXIToStream_W # (
     output wire [DATA_WIDTH-1:0] data,
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
     output wire [    ID_WIDTH-1:0] AXIM_wid,
-    output wire [             1:0] AXIM_wdata,
+    output wire [DATA_WIDTH-1:0] AXIM_wdata,
     output wire [DATA_WIDTH/8-1:0] AXIM_wstrb,
     output wire                    AXIM_wlast,
     output wire [  USER_WIDTH-1:0] AXIM_wuser,
     output wire                    AXIM_wvalid,
-    input  wire                    AXIM_wready,
+    input  wire                  AXIM_wready,
     // AXI Slave (input wire) interface
     input wire [    ID_WIDTH-1:0] AXIS_wid,
     input wire [DATA_WIDTH-1:0] AXIS_wdata,
@@ -63,8 +63,8 @@ assign AXIM_wdata = AXIS_wdata;
 assign AXIM_wuser = AXIS_wuser;
 assign AXIM_wlast = AXIS_wlast;
 assign AXIM_wstrb = AXIS_wstrb;
-assign AXIM_wvalid = resetn && AXIS_wvalid;
-assign AXIS_wready = resetn && AXIM_wready;
+assign AXIM_wvalid = AXIS_wvalid;
+assign AXIS_wready = AXIM_wready;
 
 
 endmodule

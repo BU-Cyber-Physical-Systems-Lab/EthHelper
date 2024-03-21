@@ -40,24 +40,24 @@ module Dummy_AXIToStream_B # (
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
-    output wire [    ID_WIDTH-1:0] AXIM_bid,
-    output wire [             1:0] AXIM_bresp,
-    output wire [  USER_WIDTH-1:0] AXIM_buser,
-    output wire                    AXIM_bvalid,
-    input  wire                    AXIM_bready,
+    input wire [    ID_WIDTH-1:0] AXIM_bid,
+    input wire [             1:0] AXIM_bresp,
+    input wire [  USER_WIDTH-1:0] AXIM_buser,
+    input wire                    AXIM_bvalid,
+    output  wire                    AXIM_bready,
     // AXI Slave (input wire) interface
-    input  wire [    ID_WIDTH-1:0] AXIS_bid,
-    input  wire [             1:0] AXIS_bresp,
-    input  wire [  USER_WIDTH-1:0] AXIS_buser,
-    input  wire                    AXIS_bvalid,
-    output wire                    AXIS_bready
+    output  wire [    ID_WIDTH-1:0] AXIS_bid,
+    output  wire [             1:0] AXIS_bresp,
+    output  wire [  USER_WIDTH-1:0] AXIS_buser,
+    output  wire                    AXIS_bvalid,
+    input wire                    AXIS_bready
 );
 
 
-assign AXIM_bid = AXIS_bid;
-assign AXIM_bresp = AXIS_bresp;
-assign AXIM_buser = AXIS_buser;
-assign AXIM_bvalid = resetn && AXIS_bvalid;
-assign AXIS_bready = resetn && AXIM_bready;
+assign AXIS_bid = AXIM_bid;
+assign AXIS_bresp = AXIM_bresp;
+assign AXIS_buser = AXIM_buser;
+assign AXIS_bvalid = AXIM_bvalid;
+assign AXIM_bready = AXIS_bready;
 
 endmodule
