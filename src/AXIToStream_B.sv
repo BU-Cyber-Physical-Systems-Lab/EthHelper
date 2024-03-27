@@ -34,17 +34,17 @@ module AXIToStream_B #(
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
     // AXI Slave (input wire) interface, will snoop a transaction
-    output  wire [  ID_WIDTH-1:0] AXIS_bid,
-    output  wire [           1:0] AXIS_bresp,
-    output  wire [USER_WIDTH-1:0] AXIS_buser,
-    output  wire                  AXIS_bvalid,
-    input wire                  AXIS_bready,
+    output wire [  ID_WIDTH-1:0] AXIS_bid,
+    output wire [           1:0] AXIS_bresp,
+    output wire [USER_WIDTH-1:0] AXIS_buser,
+    output wire                  AXIS_bvalid,
+    input  wire                  AXIS_bready,
     // AXI master (output wire) Interface, will forward the snooped transaction to destination
-    input wire [  ID_WIDTH-1:0] AXIM_bid,
-    input wire [           1:0] AXIM_bresp,
-    input wire [USER_WIDTH-1:0] AXIM_buser,
-    input wire                  AXIM_bvalid,
-    output  wire                  AXIM_bready
+    input  wire [  ID_WIDTH-1:0] AXIM_bid,
+    input  wire [           1:0] AXIM_bresp,
+    input  wire [USER_WIDTH-1:0] AXIM_buser,
+    input  wire                  AXIM_bvalid,
+    output wire                  AXIM_bready
 );
   assign AXIS_bid = AXIM_bid;
   assign AXIS_bresp = AXIM_bresp;
@@ -55,14 +55,11 @@ module AXIToStream_B #(
   assign AXIM_bready = AXIS_bready && (~resetn || ready);
   //out data is valid only when there is a handshake and we are not in reset state
   assign valid = resetn && AXIM_bvalid && AXIS_bready;
-  // these transaction need only one clock cycle to be completed, so we are in progress only when the input is valid
-  assign in_progress = valid;
+  // these transaction need only one clock cycle to be completed
+  assign in_progress = 0;
   assign last = ready && valid;
   // the output data is composed as follows
   assign data = {
-    STREAM_TYPE,
-    AXIM_bid,
-    {DATA_WIDTH - STREAM_TYPE_WIDTH - ID_WIDTH - 2{1'b0}},
-    AXIM_bresp
+    STREAM_TYPE, AXIM_bid, {DATA_WIDTH - STREAM_TYPE_WIDTH - ID_WIDTH - 2{1'b0}}, AXIM_bresp
   };
 endmodule

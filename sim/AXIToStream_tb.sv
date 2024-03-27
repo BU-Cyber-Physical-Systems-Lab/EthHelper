@@ -31,7 +31,7 @@ module AXIToStream_tb ();
   parameter channels = 5;
   bit [channels-1:0] RESETS;
 
-  //Instantiate the laock design wrapper and connect external pins
+  //Instantiate the lock design wrapper and connect external pins
   AXIToStream_test_wrapper #() ats_test (
       .aclk_0(clk),
       .aresetn_0(resetn),
@@ -92,7 +92,7 @@ module AXIToStream_tb ();
     master_agent.start_master();
     slave_agent.start_slave();
     stream_slave_agent.start_slave();
-    RESETS = 5'b00011;
+    RESETS = 5'b00101;
     $display("iteration number %d", i);
     // The master creates a random write transaction
     wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
@@ -107,14 +107,14 @@ module AXIToStream_tb ();
     // The stream slave generates a ready signal otherwise we will be stuck forever
     stream_slave_agent.driver.send_tready(ready_gen);
     // We send the write transaction
-    // master_agent.wr_driver.send(wr_transaction);
+		 master_agent.wr_driver.send(wr_transaction);
     // And like before, we make the slave accept the transaction
-    //stream_slave_agent.driver.send_tready(ready_gen);
+    stream_slave_agent.driver.send_tready(ready_gen);
 
     // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
     master_agent.wait_drivers_idle();
     //@todo: reset only the streaming module and check if transactions still go trough
-    master_agent.wr_driver.send(wr_transaction);
+    //master_agent.wr_driver.send(wr_transaction);
 
     stream_slave_agent.driver.send_tready(ready_gen);
 

@@ -89,8 +89,8 @@ module AXIToStream_W #(
   assign in_progress = (state > METADATA);
 
   //the sending register will determine if we are sending data or metadata
-  assign data =  //did we get a handshake?
-      (valid & ready) ?
+  assign data =  //do we have valid data?
+      (ready && valid) ?
       // are sending metadata?
       (state == METADATA) ?
       //yes
@@ -105,19 +105,27 @@ module AXIToStream_W #(
       0;
 
   always @(posedge clk) begin
-    if (valid & ready) begin
-      if (state == METADATA) begin
-        state   <= DATA;
-        strobes <= 0;
-      end else if (state == DATA) begin
-        //we accumulate strobes in the strobes register
-        strobes <= {strobes[(BURST_SIZE-1)*DATA_WIDTH/8-1:0], AXIS_wstrb};
-        if (AXIS_wlast) begin
-          state <= STROBE;
+    if (resetn) begin
+      if (ready && valid) begin
+        if (state == METADATA) begin
+          state   <= DATA;
+          strobes <= 0;
+        end else if (state == DATA) begin
+          //we accumulate strobes in the strobes register
+          strobes <= {strobes[(BURST_SIZE-1)*DATA_WIDTH/8-1:0], AXIS_wstrb};
+          if (AXIS_wlast) begin
+            state <= STROBE;
+          end
+        end else if (state == STROBE) begin
+          state   <= METADATA;
+          strobes <= 0;
+        end else begin
+          state   <= state;
+          strobes <= strobes;
         end
-      end else if (state == STROBE) begin
-        state   <= METADATA;
-        strobes <= 0;
+      end else begin
+        state   <= state;
+        strobes <= strobes;
       end
     end else begin
       state   <= METADATA;
