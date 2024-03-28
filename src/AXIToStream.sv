@@ -250,12 +250,12 @@ module AXIToStream #(
       .AXIM_axvalid(AXIM_awvalid)
   );
 
-  AXIToStream_B #(
+  Dummy_AXIToStream_B #(
       .DATA_WIDTH(DATA_WIDTH),
-      .ID_WIDTH(ID_WIDTH),
-      .USER_WIDTH(USER_WIDTH),
-      .STREAM_TYPE_WIDTH(channels_bits),
-      .STREAM_TYPE(B_ID)
+      .ID_WIDTH  (ID_WIDTH),
+      .USER_WIDTH(USER_WIDTH)
+      //.STREAM_TYPE_WIDTH(channels_bits),
+      //.STREAM_TYPE(B_ID)
   ) B (
       .clk(clk),
       .resetn(resets[B_ID]),
@@ -311,13 +311,13 @@ module AXIToStream #(
       .AXIS_rready(AXIS_rready)
   );
 
-  AXIToStream_W #(
+  Dummy_AXIToStream_W #(
       .DATA_WIDTH(DATA_WIDTH),
-      .ID_WIDTH(ID_WIDTH),
-      .USER_WIDTH(USER_WIDTH),
-      .STREAM_TYPE_WIDTH(channels_bits),
-      .STREAM_TYPE(W_ID),
-      .BURST_SIZE(BURST_LEN)
+      .ID_WIDTH  (ID_WIDTH),
+      .USER_WIDTH(USER_WIDTH)
+      //.STREAM_TYPE_WIDTH(channels_bits),
+      //.STREAM_TYPE(W_ID),
+      //.BURST_SIZE(BURST_LEN)
   ) W (
       .clk(clk),
       .resetn(resets[W_ID]),
@@ -372,15 +372,9 @@ module AXIToStream #(
   wire [channels_max-1:0] valid, in_progress;
 
 
-  // We need to backoff for at least one clock cycle after a transaction
-  // completes, to avoid having stream_tvalid stay high while stream_tlast
-  // changes.
-  reg backoff;
-
-  // we mask the ready signal with the backoff signal, to sending different
-  // transactions back to back and violating the protocol by having stream_tvalid
-  //  stay high and stream_tlast changing.
-  assign stream_tvalid = (|valid) && ~backoff;
+  // we are ready to stream when there is at least on ready submodule
+  // A
+  assign stream_tvalid = |ready;
 
   /// since everything is relative to last_index we need also the one-hot
   /// encoding for the ready to be relative to last_index
@@ -410,52 +404,58 @@ module AXIToStream #(
   // data
   reg [channels_bits-1:0] last_index;
 
+wire [channels_max-1:0][channels_bits-1:0] indexes;
+generate
+  for (k=0; k<channels_max;k++) begin
+    assign indexes[k][channels_bits-1:0]= last_index+k;
+  end
+endgenerate
+
   // assign the one-hot encodings to the ready signal, in a round robing fashion
   ///this has to unroll to channels-1 amount regardless if the channels are used
   ///@todo is there a way to do this in a neater way?
-  // we mask the ready signal with the backoff signal, to sending different
-  // transactions back to back and violating the protocol by having stream_tvalid
-  //  stay high and stream_tlast changing.
-  assign ready = (~backoff && stream_tready && (valid[last_index] || in_progress[last_index])) ?   encodings[last_index][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+1] || in_progress[last_index+1])) ? encodings[last_index+1][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+2] || in_progress[last_index+2])) ? encodings[last_index+2][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+3] || in_progress[last_index+3])) ? encodings[last_index+3][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+4] || in_progress[last_index+4])) ? encodings[last_index+4][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+5] || in_progress[last_index+5])) ? encodings[last_index+5][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+6] || in_progress[last_index+6])) ? encodings[last_index+6][channels_max-1:0] :
- (~backoff && stream_tready && (valid[last_index+7] || in_progress[last_index+7])) ? encodings[last_index+7][channels_max-1:0] :
- NONE_HOT;//continue for all channels_bits then last else is NONE_HOT;
+  assign ready = (stream_tready)?
+  (valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ?   encodings[indexes[0]][channels_max-1:0] :
+  (valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? encodings[indexes[1]][channels_max-1:0] :
+  (valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? encodings[indexes[2]][channels_max-1:0] :
+  (valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? encodings[indexes[3]][channels_max-1:0] :
+  (valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? encodings[indexes[4]][channels_max-1:0] :
+  (valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? encodings[indexes[5]][channels_max-1:0] :
+  (valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? encodings[indexes[6]][channels_max-1:0] :
+  (valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? encodings[indexes[7]][channels_max-1:0] :
+  NONE_HOT : NONE_HOT;//continue for all channels_bits then last else is NONE_HOT;
 
   /// with the same logic as the ready, we send the matching data
   ///this has to unroll to channels-1 amount regardless if the channels are used
   //@todo is there a way to do this in a neater way?
-  assign stream_tdata = (ready[last_index])? submodule_data[last_index][DATA_WIDTH-1:0] :
-(ready[last_index+1]) ? submodule_data[last_index+1][DATA_WIDTH-1:0] :
-(ready[last_index+2]) ? submodule_data[last_index+2][DATA_WIDTH-1:0] :
-(ready[last_index+3]) ? submodule_data[last_index+3][DATA_WIDTH-1:0] :
-(ready[last_index+4]) ? submodule_data[last_index+4][DATA_WIDTH-1:0] :
-(ready[last_index+5]) ? submodule_data[last_index+5][DATA_WIDTH-1:0] :
-(ready[last_index+6]) ? submodule_data[last_index+6][DATA_WIDTH-1:0] :
-(ready[last_index+7]) ? submodule_data[last_index+7][DATA_WIDTH-1:0] :
- 0; //continue for all channels_bits then last else is 0;
+  assign stream_tdata = (stream_tready) ?
+(valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? submodule_data[indexes[0]][DATA_WIDTH-1:0] :
+(valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? submodule_data[indexes[1]][DATA_WIDTH-1:0] :
+(valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? submodule_data[indexes[2]][DATA_WIDTH-1:0] :
+(valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? submodule_data[indexes[3]][DATA_WIDTH-1:0] :
+(valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? submodule_data[indexes[4]][DATA_WIDTH-1:0] :
+(valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? submodule_data[indexes[5]][DATA_WIDTH-1:0] :
+(valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? submodule_data[indexes[6]][DATA_WIDTH-1:0] :
+(valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? submodule_data[indexes[7]][DATA_WIDTH-1:0] :
+ 0:0; //continue for all channels_bits then last else is 0;
 
   /// with the same logic as the ready, we choose which last to forward
   ///this has to unroll to channels-1 amount regardless if the channels are used
   //@todo is there a way to do this in a neater way?
-  assign stream_tlast = (ready[last_index] || in_progress[last_index]) ? last[last_index] :
-(ready[last_index+1]) ? last[last_index+1] :
-(ready[last_index+2]) ? last[last_index+2] :
-(ready[last_index+3]) ? last[last_index+3] :
-(ready[last_index+4]) ? last[last_index+4] :
-(ready[last_index+5]) ? last[last_index+5] :
-(ready[last_index+6]) ? last[last_index+6] :
-(ready[last_index+7]) ? last[last_index+7] :
- 0; //continue for all channels_bits then last else is 0;
+  assign stream_tlast = (stream_tready)?
+(valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? last[indexes[0]] :
+(valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? last[indexes[1][channels_bits-1:0]] :
+(valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? last[indexes[2][channels_bits-1:0]] :
+(valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? last[indexes[3][channels_bits-1:0]] :
+(valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? last[indexes[4][channels_bits-1:0]] :
+(valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? last[indexes[5][channels_bits-1:0]] :
+(valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? last[indexes[6][channels_bits-1:0]] :
+(valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? last[indexes[7][channels_bits-1:0]] :
+ 0:0; //continue for all channels_bits then last else is 0;
 
   //have the encoding maps always be refreshed in this always block
   //helps separate somewhat static code with the actual logic
   //*NOTE:* use the IDs to index the encodings.
-  integer j;
   always @(posedge clk) begin
     encodings[AR_ID] <= AR_HOT;
     encodings[AW_ID] <= AW_HOT;
@@ -463,16 +463,14 @@ module AXIToStream #(
     encodings[W_ID]  <= W_HOT;
     encodings[B_ID]  <= B_HOT;
     //if there are unused encodings slots we set them to NONE_HOT
-    for (j = LAST_ID + 1; j < channels_max; j++) begin
+    for (integer j = LAST_ID + 1; j < channels_max; j++) begin
       encodings[j] <= NONE_HOT;
     end
   end
-
-  //Here we need to check all channels
   //starting from last_index and accept the first valid channel (meaning that
   //this for should unroll in a cascading if-else for all the entries encoded by
   //the channels bit.)
-  integer i;
+      integer i;
   always @(posedge clk) begin
     if (resetn) begin
       //we do 2^channels_bits iterations to check all the possible positions
@@ -486,26 +484,23 @@ module AXIToStream #(
       // and when we change we change directly to the next channel, to ensure
       // fairness. As a side effect, if nothing is valid other than the current
       // channel, we stay with that.
-      for (i = 1; i < channels_max; i++) begin
-        if (~in_progress[last_index] && valid[last_index+i]) begin
-          break;
+      if (~in_progress[last_index]) begin
+        for (i = 0; i < channels_max; i++) begin
+          if (valid[last_index+1+i]) begin
+            if (i+1+last_index>= channels_max) begin
+              last_index <= i+1+last_index-channels_max;
+            end else begin
+              last_index <= i + 1+ last_index;
+            end
+            break;
+          end
         end
+      end else begin
+        last_index <= last_index;
       end
-      // avoid latching in case the above loop did nothing
-      last_index <= i + last_index;
     end else begin
       last_index <= 0;
     end
   end
-
-  // The backoff logic. We set the signal high when we need to backoff for a clock cycle.
-  always @(posedge clk) begin
-    if (resetn) begin
-      backoff <= stream_tlast && stream_tready;
-    end else begin
-      backoff <= 0;
-    end
-  end
-
 
 endmodule

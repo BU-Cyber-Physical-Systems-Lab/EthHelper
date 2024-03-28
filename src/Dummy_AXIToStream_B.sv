@@ -1,22 +1,22 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
+// Company:
+// Engineer:
+//
 // Create Date: 02/20/2024 04:36:04 PM
-// Design Name: 
+// Design Name:
 // Module Name: Dummy_AXIToStream_B
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
+// Project Name:
+// Target Devices:
+// Tool Versions:
+// Description:
+//
+// Dependencies:
+//
 // Revision:
 // Revision 0.01 - File Created
 // Additional Comments:
-// 
+//
 //////////////////////////////////////////////////////////////////////////////////
 
 module Dummy_AXIToStream_B # (
@@ -37,6 +37,7 @@ module Dummy_AXIToStream_B # (
     output wire                  valid,
     // high when this submodule is streaming data (to block the other submodules from streaming data at the same time)
     output wire                  in_progress,
+    output wire                  last,
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
@@ -53,7 +54,10 @@ module Dummy_AXIToStream_B # (
     input wire                    AXIS_bready
 );
 
-
+assign data =0;
+assign valid=0;
+assign in_progress=0;
+assign last=0;
 assign AXIS_bid = AXIM_bid;
 assign AXIS_bresp = AXIM_bresp;
 assign AXIS_buser = AXIM_buser;

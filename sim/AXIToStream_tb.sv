@@ -105,9 +105,10 @@ module AXIToStream_tb ();
     // We send the read transaction
     master_agent.rd_driver.send(rd_transaction);
     // The stream slave generates a ready signal otherwise we will be stuck forever
+    assert (rd_transaction.randomize());
     stream_slave_agent.driver.send_tready(ready_gen);
     // We send the write transaction
-		 master_agent.wr_driver.send(wr_transaction);
+    master_agent.wr_driver.send(wr_transaction);
     // And like before, we make the slave accept the transaction
     stream_slave_agent.driver.send_tready(ready_gen);
 
@@ -115,10 +116,12 @@ module AXIToStream_tb ();
     master_agent.wait_drivers_idle();
     //@todo: reset only the streaming module and check if transactions still go trough
     //master_agent.wr_driver.send(wr_transaction);
+    master_agent.rd_driver.send(rd_transaction);
 
+    // And like before, we make the slave accept the transaction
+    stream_slave_agent.driver.send_tready(ready_gen);
     stream_slave_agent.driver.send_tready(ready_gen);
 
-    assert (rd_transaction.randomize());
 
     master_agent.wait_drivers_idle();
     $finish;

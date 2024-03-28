@@ -83,14 +83,15 @@ module AXIToStream_Ax #(
   //out data is valid only when there is a handshake and we are not in reset state
   assign valid = resetn && AXIS_axvalid && AXIM_axready;
   // these transaction need only one clock cycle to be completed
-  assign in_progress = 0;
-  assign last = valid && ready;
+  assign in_progress =0;
+  // assign last = valid & ready;
+  assign last =valid;
   // the output data is composed as follows
   assign data = {
     STREAM_TYPE,
-    AXIM_axid,
-    AXIM_axlen,
+    AXIS_axid,
+    AXIS_axlen,
     {DATA_WIDTH - STREAM_TYPE_WIDTH - ID_WIDTH - BURST_LEN - ADDR_WIDTH{1'b0}},
-    AXIM_axaddr
+    AXIS_axaddr
   };
 endmodule
