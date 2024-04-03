@@ -250,12 +250,12 @@ module AXIToStream #(
       .AXIM_axvalid(AXIM_awvalid)
   );
 
-  Dummy_AXIToStream_B #(
+  AXIToStream_B #(
       .DATA_WIDTH(DATA_WIDTH),
-      .ID_WIDTH  (ID_WIDTH),
-      .USER_WIDTH(USER_WIDTH)
-      //.STREAM_TYPE_WIDTH(channels_bits),
-      //.STREAM_TYPE(B_ID)
+      .ID_WIDTH(ID_WIDTH),
+      .USER_WIDTH(USER_WIDTH),
+      .STREAM_TYPE_WIDTH(channels_bits),
+      .STREAM_TYPE(B_ID)
   ) B (
       .clk(clk),
       .resetn(resets[B_ID]),
@@ -404,12 +404,12 @@ module AXIToStream #(
   // data
   reg [channels_bits-1:0] last_index;
 
-wire [channels_max-1:0][channels_bits-1:0] indexes;
-generate
-  for (k=0; k<channels_max;k++) begin
-    assign indexes[k][channels_bits-1:0]= last_index+k;
-  end
-endgenerate
+  wire [channels_max-1:0][channels_bits-1:0] indexes;
+  generate
+    for (k = 0; k < channels_max; k++) begin
+      assign indexes[k][channels_bits-1:0] = last_index + k;
+    end
+  endgenerate
 
   // assign the one-hot encodings to the ready signal, in a round robing fashion
   ///this has to unroll to channels-1 amount regardless if the channels are used
@@ -428,7 +428,7 @@ endgenerate
   /// with the same logic as the ready, we send the matching data
   ///this has to unroll to channels-1 amount regardless if the channels are used
   //@todo is there a way to do this in a neater way?
-  assign stream_tdata = (stream_tready) ?
+  assign stream_tdata =
 (valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? submodule_data[indexes[0]][DATA_WIDTH-1:0] :
 (valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? submodule_data[indexes[1]][DATA_WIDTH-1:0] :
 (valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? submodule_data[indexes[2]][DATA_WIDTH-1:0] :
@@ -437,12 +437,12 @@ endgenerate
 (valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? submodule_data[indexes[5]][DATA_WIDTH-1:0] :
 (valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? submodule_data[indexes[6]][DATA_WIDTH-1:0] :
 (valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? submodule_data[indexes[7]][DATA_WIDTH-1:0] :
- 0:0; //continue for all channels_bits then last else is 0;
+ 0; //continue for all channels_bits then last else is 0;
 
   /// with the same logic as the ready, we choose which last to forward
   ///this has to unroll to channels-1 amount regardless if the channels are used
   //@todo is there a way to do this in a neater way?
-  assign stream_tlast = (stream_tready)?
+  assign stream_tlast =
 (valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? last[indexes[0]] :
 (valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? last[indexes[1][channels_bits-1:0]] :
 (valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? last[indexes[2][channels_bits-1:0]] :
@@ -451,7 +451,7 @@ endgenerate
 (valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? last[indexes[5][channels_bits-1:0]] :
 (valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? last[indexes[6][channels_bits-1:0]] :
 (valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? last[indexes[7][channels_bits-1:0]] :
- 0:0; //continue for all channels_bits then last else is 0;
+ 0; //continue for all channels_bits then last else is 0;
 
   //have the encoding maps always be refreshed in this always block
   //helps separate somewhat static code with the actual logic
@@ -470,7 +470,7 @@ endgenerate
   //starting from last_index and accept the first valid channel (meaning that
   //this for should unroll in a cascading if-else for all the entries encoded by
   //the channels bit.)
-      integer i;
+  integer i;
   always @(posedge clk) begin
     if (resetn) begin
       //we do 2^channels_bits iterations to check all the possible positions
@@ -487,10 +487,10 @@ endgenerate
       if (~in_progress[last_index]) begin
         for (i = 0; i < channels_max; i++) begin
           if (valid[last_index+1+i]) begin
-            if (i+1+last_index>= channels_max) begin
-              last_index <= i+1+last_index-channels_max;
+            if (i + 1 + last_index >= channels_max) begin
+              last_index <= i + 1 + last_index - channels_max;
             end else begin
-              last_index <= i + 1+ last_index;
+              last_index <= i + 1 + last_index;
             end
             break;
           end

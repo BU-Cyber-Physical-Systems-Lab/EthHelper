@@ -92,7 +92,7 @@ module AXIToStream_tb ();
     master_agent.start_master();
     slave_agent.start_slave();
     stream_slave_agent.start_slave();
-    RESETS = 5'b00101;
+    RESETS = 5'b10011;
     $display("iteration number %d", i);
     // The master creates a random write transaction
     wr_transaction = master_agent.wr_driver.create_transaction("write transaction");
@@ -115,8 +115,7 @@ module AXIToStream_tb ();
     // Before endind the simulation, we need to make sure that the transactions are executed so we explictily wait until all the drivers in the master vip are idling
     master_agent.wait_drivers_idle();
     //@todo: reset only the streaming module and check if transactions still go trough
-    //master_agent.wr_driver.send(wr_transaction);
-    master_agent.rd_driver.send(rd_transaction);
+    master_agent.wr_driver.send(wr_transaction);
 
     // And like before, we make the slave accept the transaction
     stream_slave_agent.driver.send_tready(ready_gen);
