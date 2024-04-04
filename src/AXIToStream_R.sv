@@ -62,7 +62,7 @@ module AXIToStream_R #(
   reg [DATA_WIDTH-1:0] out_reg;
   // this reister represent what we are sending to the stream module once we have a handshake
   enum reg [1:0] {
-    METADOATA,  // at the beginning we send metadata
+    METADATA,  // at the beginning we send metadata
     SENDING,  // then the transaction
     SEND_LAST // but the last transaction piece will be delayed, since we sent metadata first, so we need to remeber about it
   } sending;
