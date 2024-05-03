@@ -27,12 +27,20 @@ module AXIToStream_orchestrator_wrapper#(
     parameter BURST_LEN = 8,
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
-    parameter DEST_WIDTH = 32
+    parameter DEST_WIDTH = 32, 
+    parameter CHANNELS = 6
 )(
     input  wire                    clk,
     input  wire                    resetn,
     // AXI Slave (input wire) interface, will AXIS a transaction
-        
+    // input  wire                    RESETN_AR,
+    // input  wire                    RESETN_AW,
+    // input  wire                    RESETN_R,
+    // input  wire                    RESETN_W,
+    // input  wire                    RESETN_B,
+
+    input wire [CHANNELS-1:0] submodule_resets,
+         
     input  wire [    ID_WIDTH-1:0] AXIS_awid,
     input  wire [  ADDR_WIDTH-1:0] AXIS_awaddr,
     input  wire [   BURST_LEN-1:0] AXIS_awlen,
@@ -145,15 +153,24 @@ module AXIToStream_orchestrator_wrapper#(
     input  wire                    stream_tready
     );
     
-    AXIToStream_orchestrator # (
+    AXIToStream_orchestrator_Reg # (
       .DATA_WIDTH(DATA_WIDTH),
       .ADDR_WIDTH(ADDR_WIDTH),
       .ID_WIDTH(ID_WIDTH),
       .BURST_LEN(BURST_LEN),
       .LOCK_WIDTH(LOCK_WIDTH),
       .USER_WIDTH(USER_WIDTH),
-      .DEST_WIDTH(DEST_WIDTH)
+      .DEST_WIDTH(DEST_WIDTH),
+      .channels(CHANNELS)
     ) orch (
+    .clk(clk),
+    .resetn(resetn),
+    // .RESETN_AR(RESETN_AR),
+    // .RESETN_AW(RESETN_AW),
+    // .RESETN_R(RESETN_R),
+    // .RESETN_W(RESETN_W),
+    // .RESETN_B(RESETN_B),
+    .submodule_resets(submodule_resets),
     .AXIS_awid(AXIS_awid),
     .AXIS_awaddr(AXIS_awaddr),
     .AXIS_awlen(AXIS_awlen),
@@ -180,6 +197,7 @@ module AXIToStream_orchestrator_wrapper#(
     .AXIM_awuser(AXIM_awuser),
     .AXIM_awready(AXIM_awready),
     .AXIM_awvalid(AXIM_awvalid),
+    
     .AXIS_arid(AXIS_arid),
     .AXIS_araddr(AXIS_araddr),
     .AXIS_arlen(AXIS_arlen),
@@ -206,6 +224,7 @@ module AXIToStream_orchestrator_wrapper#(
     .AXIM_aruser(AXIM_aruser),
     .AXIM_arready(AXIM_arready),
     .AXIM_arvalid(AXIM_arvalid),
+    
     .AXIM_wid(AXIM_wid),
     .AXIM_wdata(AXIM_wdata),
     .AXIM_wstrb(AXIM_wstrb),
@@ -220,6 +239,7 @@ module AXIToStream_orchestrator_wrapper#(
     .AXIS_wuser(AXIS_wuser),
     .AXIS_wvalid(AXIS_wvalid),
     .AXIS_wready(AXIS_wready),
+    
     .AXIM_bid(AXIM_bid),
     .AXIM_bresp(AXIM_bresp),
     .AXIM_buser(AXIM_buser),
@@ -230,6 +250,8 @@ module AXIToStream_orchestrator_wrapper#(
     .AXIS_buser(AXIS_buser),
     .AXIS_bvalid(AXIS_bvalid),
     .AXIS_bready(AXIS_bready),
+
+
     .AXIM_rid(AXIM_rid),
     .AXIM_rdata(AXIM_rdata),
     .AXIM_rresp(AXIM_rresp),
@@ -237,6 +259,13 @@ module AXIToStream_orchestrator_wrapper#(
     .AXIM_ruser(AXIM_ruser),
     .AXIM_rvalid(AXIM_rvalid),
     .AXIM_rready(AXIM_rready),
+    .AXIS_rid(AXIS_rid),
+    .AXIS_rdata(AXIS_rdata),
+    .AXIS_rresp(AXIS_rresp),
+    .AXIS_rlast(AXIS_rlast),
+    .AXIS_ruser(AXIS_ruser),
+    .AXIS_rvalid(AXIS_rvalid),
+    .AXIS_rready(AXIS_rready),
 
     .stream_tid(stream_tid),
     .stream_tdest(stream_tdest),

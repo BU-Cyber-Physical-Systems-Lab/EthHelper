@@ -24,13 +24,18 @@ module Dummy_AXIToStream_R # (
     parameter DATA_WIDTH = 128,
     parameter ADDR_WIDTH = 64,
     parameter ID_WIDTH = 32,
-    parameter BURST_LEN = 8,
-    parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64
 ) (
     input  wire                  clk,
     //negative edge synchronous reset, active low, synchronous to the clk
     input  wire                  resetn,
+    input wire                   ready,
+    output wire                  valid,
+    output wire                  in_progress,
+    output wire                  last,
+    output wire[DATA_WIDTH-1:0]  data,
+
+    output wire [5:0] submodule_transaction_length,
     
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
     input  wire [    ID_WIDTH-1:0] AXIM_rid,
@@ -49,7 +54,11 @@ module Dummy_AXIToStream_R # (
     output  wire                    AXIS_rvalid,
     input wire                    AXIS_rready
 );
-  
+  assign valid=0;
+  assign in_progress=0;
+  assign last=0;
+  assign data=0;
+  assign submodule_transaction_length=0;
   assign AXIS_rid = AXIM_rid;
   assign AXIS_rdata = AXIM_rdata;
   assign AXIS_rlast = AXIM_rlast;

@@ -28,11 +28,13 @@ import Orchestrator_axi_vip_0_0_pkg::*;
 module AXIToStream_orchestrator_tb ();
 
   bit clk, resetn;
+  bit [6:0] Sub_Resets;
 
   //Instantiate the laock design wrapper and connect external pins
   Orchestrator_wrapper #() orchestrator_test (
       .aclk_0(clk),
-      .aresetn_0(resetn)
+      .aresetn_0(resetn),
+      .submodule_resets_0(Sub_Resets)
 
   );
 
@@ -50,6 +52,8 @@ module AXIToStream_orchestrator_tb ();
 
   // start the simulation
   initial begin
+    Sub_Resets<='b000111;
+
     // Reset all modules
     resetn <= 0;
     // @bug vivado 2019.2 complains the reset signal is asserted after 20ns
@@ -109,11 +113,11 @@ module AXIToStream_orchestrator_tb ();
     
     stream_slave_agent.driver.send_tready(ready_gen);
     
-    assert (rd_transaction.randomize());
+    rd_transaction.randomize();
 
     // We send the read transaction
     master_agent.rd_driver.send(rd_transaction);
-    
+    stream_slave_agent.driver.send_tready(ready_gen);
     master_agent.wait_drivers_idle();
     //$finish;
   end

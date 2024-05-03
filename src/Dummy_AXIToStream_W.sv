@@ -40,6 +40,8 @@ module Dummy_AXIToStream_W # (
     output wire                  last,
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
+
+    output wire [5:0] submodule_transaction_length,
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
     output wire [    ID_WIDTH-1:0] AXIM_wid,
     output wire [DATA_WIDTH-1:0] AXIM_wdata,
@@ -63,6 +65,7 @@ assign data =0;
 assign valid =0;
 assign in_progress=0;
 assign last=0;
+assign submodule_transaction_length=0;
 
 assign AXIM_wid = AXIS_wid;
 assign AXIM_wdata = AXIS_wdata;

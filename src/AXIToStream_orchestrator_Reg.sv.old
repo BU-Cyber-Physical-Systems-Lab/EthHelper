@@ -5,7 +5,7 @@
  * todo
  */
 
-module AXIToStream_orchestrator #(
+module AXIToStream_orchestrator_Reg #(
     parameter DATA_WIDTH = 128,
     parameter ADDR_WIDTH = 64,
     parameter ID_WIDTH = 32,
@@ -14,39 +14,23 @@ module AXIToStream_orchestrator #(
     parameter USER_WIDTH = 64,
     parameter DEST_WIDTH = 32,
     // how many channels this module supports
-    localparam channels = 5,
+    parameter channels = 5,
     //the bit needed to represent this channels in binary
     localparam channels_bits = $clog2(channels),
-    //maximum channels that can be encoded with channels_bits, might be
-    //different from channels
-    localparam channels_max = 2 ** channels_bits,
 
-    /// the ids of the submodules (used in various indexing operations)
-    localparam AR_ID = {channels_max{1'b0}},
-    localparam AW_ID = {{channels_max - 1{1'b0}}, 1'b1},
-    localparam R_ID = {{channels_max - 2{1'b0}}, 2'b10},
-    localparam W_ID = {{channels_max - 2{1'b0}}, 2'b11},
-    localparam B_ID = {{channels_max - 3{1'b0}}, 3'b100},
-    // the ID of the last valid channel
-    localparam LAST_ID = B_ID,
-
-    ///the one-hot encoding of the ready signal
-    localparam NONE_HOT = {channels_max{1'b0}},  // no channel ready
-    localparam AR_HOT = {{channels_max - 1{1'b0}}, 1'b1},  // AR ready
-    localparam AW_HOT = {{channels_max - 2{1'b0}}, 2'b10},  //AW ready
-    localparam R_HOT = {{channels_max - 3{1'b0}}, 3'b100},  //R ready
-    localparam W_HOT = NONE_HOT,  //{{channels_max - 4{1'b0}}, 4'b1000},  //W ready
-    localparam B_HOT = NONE_HOT  //{{channels_max - 5{1'b0}}, 5'b10000}  //B ready
-
+    localparam NONE_ID = 0,
+    localparam AR_ID = 1,
+    localparam AW_ID = 2,
+    localparam R_ID = 3,
+    localparam W_ID = 4,
+    localparam B_ID = 5
+  
 ) (
     input  wire                    clk,
     input  wire                    resetn,
     // reset params
-    input  wire                    RESETN_AR,
-    input  wire                    RESETN_AW,
-    input  wire                    RESETN_R,
-    input  wire                    RESETN_W,
-    input  wire                    RESETN_B,
+    input wire [channels-1:0] submodule_resets,
+    
     // AXI Slave (input wire) interface, will AXIS a transaction
     input  wire [    ID_WIDTH-1:0] AXIS_awid,
     input  wire [  ADDR_WIDTH-1:0] AXIS_awaddr,
@@ -142,10 +126,10 @@ module AXIToStream_orchestrator #(
     // AXI stream Master (stream output wire) interface
     output wire [    ID_WIDTH-1:0] stream_tid,
     output wire [  DEST_WIDTH-1:0] stream_tdest,
-    output wire [  DATA_WIDTH-1:0] stream_tdata,
+    output reg [  DATA_WIDTH-1:0] stream_tdata,
     output wire [DATA_WIDTH/8-1:0] stream_tstrb,
     output wire [DATA_WIDTH/8-1:0] stream_tkeep,
-    output wire                    stream_tlast,
+    output reg                    stream_tlast,
     output wire [  USER_WIDTH-1:0] stream_tuser,
     output wire                    stream_tvalid,
     input  wire                    stream_tready
@@ -164,11 +148,11 @@ module AXIToStream_orchestrator #(
   ) AR (
       .clk(clk),
       .resetn(resets[AR_ID]),
-      .ready(ready[AR_ID]),
-      .valid(valid[AR_ID]),
+      .ready(Orchestrator_ready[AR_ID]),
+      .valid(submodule_valid[AR_ID]),
       .data(submodule_data[AR_ID]),
-      .in_progress(in_progress[AR_ID]),
-      .last(last[AR_ID]),
+      .in_progress(submodule_in_progress[AR_ID]),
+      .last(submodule_last[AR_ID]),
 
       //subordinate
       .AXIS_axid(AXIS_arid),
@@ -213,11 +197,11 @@ module AXIToStream_orchestrator #(
   ) AW (
       .clk(clk),
       .resetn(resets[AW_ID]),
-      .ready(ready[AW_ID]),
-      .valid(valid[AW_ID]),
+      .ready(Orchestrator_ready[AW_ID]),
+      .valid(submodule_valid[AW_ID]),
       .data(submodule_data[AW_ID]),
-      .in_progress(in_progress[AW_ID]),
-      .last(last[AW_ID]),
+      .in_progress(submodule_in_progress[AW_ID]),
+      .last(submodule_last[AW_ID]),
 
       //subordinate
       .AXIS_axid(AXIS_awid),
@@ -259,11 +243,11 @@ module AXIToStream_orchestrator #(
   ) B (
       .clk(clk),
       .resetn(resets[B_ID]),
-      .ready(ready[B_ID]),
-      .valid(valid[B_ID]),
+      .ready(Orchestrator_ready[B_ID]),
+      .valid(submodule_valid[B_ID]),
       .data(submodule_data[B_ID]),
-      .in_progress(in_progress[B_ID]),
-      .last(last[B_ID]),
+      .in_progress(submodule_in_progress[B_ID]),
+      .last(submodule_last[B_ID]),
 
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_bid(AXIM_bid),
@@ -288,11 +272,11 @@ module AXIToStream_orchestrator #(
   ) R (
       .clk(clk),
       .resetn(resets[R_ID]),
-      .ready(ready[R_ID]),
-      .valid(valid[R_ID]),
+      .ready(Orchestrator_ready[R_ID]),
+      .valid(submodule_valid[R_ID]),
       .data(submodule_data[R_ID]),
-      .in_progress(in_progress[R_ID]),
-      .last(last[R_ID]),
+      .in_progress(submodule_in_progress[R_ID]),
+      .last(submodule_last[R_ID]),
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_rid(AXIM_rid),
       .AXIM_rdata(AXIM_rdata),
@@ -311,13 +295,7 @@ module AXIToStream_orchestrator #(
       .AXIS_rready(AXIS_rready)
   );
 
-  // assign AXIM_rid    =   AXIM_rid;
-  // assign AXIM_rdata  = AXIM_rdata;
-  // assign AXIM_rresp  = AXIM_rresp;
-  // assign AXIM_rlast  = AXIM_rlast;
-  // assign AXIM_ruser  = AXIM_ruser;
-  // assign AXIM_rvalid = AXIM_rvalid;
-  // assign AXIM_rready = AXIM_rready;
+  
 
   Dummy_AXIToStream_W #(
       .DATA_WIDTH(DATA_WIDTH),
@@ -329,11 +307,11 @@ module AXIToStream_orchestrator #(
   ) W (
       .clk(clk),
       .resetn(resets[W_ID]),
-      .ready(ready[W_ID]),
-      .valid(valid[W_ID]),
+      .ready(Orchestrator_ready[W_ID]),
+      .valid(submodule_valid[W_ID]),
       .data(submodule_data[W_ID]),
-      .in_progress(in_progress[W_ID]),
-      .last(last[W_ID]),
+      .in_progress(submodule_in_progress[W_ID]),
+      .last(submodule_last[W_ID]),
       // AXI master (output wire) Interface, will forward the AXIS transaction to destination
       .AXIM_wid(AXIM_wid),
       .AXIM_wdata(AXIM_wdata),
@@ -351,7 +329,7 @@ module AXIToStream_orchestrator #(
       .AXIS_wvalid(AXIS_wvalid),
       .AXIS_wready(AXIS_wready)
   );
-
+  reg [channels_bits-1:0] State;//interpret this as last
 
   //AXI stream wirings
   assign stream_tid   = 0;
@@ -359,158 +337,116 @@ module AXIToStream_orchestrator #(
   assign stream_tstrb = 0;
   assign stream_tkeep = {DATA_WIDTH / 8{1'b1}};
   assign stream_tuser = 0;
-  
+
+  wire[channels-1:0][channels-1:0] encodings;
+
+//all the unused channels have their ready,last,valid and in_progress to 0
 
 
   ///send reset to individual submodules (and keep unwanted submodules in reset)
   wire [channels-1:0] resets;
-  assign resets[AR_ID] = resetn && RESETN_AR;
-  assign resets[AW_ID] = resetn && RESETN_AW;
-  assign resets[R_ID]  = resetn && RESETN_R;
-  assign resets[W_ID]  = resetn && RESETN_W;
-  assign resets[B_ID]  = resetn && RESETN_B;
+  assign resets[AR_ID] = resetn && submodule_resets[AR_ID];
+  assign resets[AW_ID] = resetn && submodule_resets[AW_ID];
+  assign resets[R_ID]  = resetn && submodule_resets[R_ID];
+  assign resets[W_ID]  = resetn && submodule_resets[W_ID];
+  assign resets[B_ID]  = resetn && submodule_resets[B_ID];
 
   /// how the top module signals a specific submodule that the transaction can proceed
-  wire [channels_max-1:0] ready;
-  // each submodule has a last signal
-  wire [channels_max-1:0] last;
+  reg [channels-1:0] Orchestrator_ready;
 
   /// how the submodules will signal to the top module that they have valid data
   /// (after having detected a handshake between the two original axi
   /// interfaces), or a multi-clock cycle transaction is still in progress (e.g.
   /// R/w).
-  wire [channels_max-1:0] valid, in_progress;
-
-
-  // we are ready to stream when there is at least on ready submodule
-  // A
-  assign stream_tvalid = |ready;
-
-  /// since everything is relative to last_index we need also the one-hot
-  /// encoding for the ready to be relative to last_index
-  reg  [channels_max-1:0][channels_max-1:0] encodings;
-
-  ///finally also the data that we send to the AXI4stream has to be relative to
-  ///last_index
-  //why is this a 2d array again? was it to have one dimension to index it and
+  wire [channels-1:0] submodule_valid, submodule_in_progress, submodule_last;
   //the next to have the data
-  wire [channels_max-1:0][  DATA_WIDTH-1:0] submodule_data;
-
-  //all the unused channels have their ready,last,valid and in_progress to 0
-  genvar k;
-  generate
-    for (k = LAST_ID + 1; k < channels_max; k++) begin
-      assign valid[k] = 0;
-      assign ready[k] = 0;
-      assign last[k] = 0;
-      assign in_progress[k] = 0;
-      assign submodule_data[k][DATA_WIDTH-1:0] = 0;
-    end
-  endgenerate
+  wire [channels-1:0][DATA_WIDTH-1:0] submodule_data;
+  
 
   ///to implement round robin we need a register that will cycle between all the
   ///possible channels (when they are valid)
   // this register will hold the id of the last channel that has transmitted
   // data
   reg [channels_bits-1:0] last_index;
-
-  wire [channels_max-1:0][channels_bits-1:0] indexes;
+  
+  genvar k;
   generate
-    for (k = 0; k < channels_max; k++) begin
-      assign indexes[k][channels_bits-1:0] = last_index + k;
-    end
-  endgenerate
+   for (k = 0; k <= channels; k++) begin
+      //Make first encoding all 0 for NONE state
+      if(k>0)begin
+        assign encodings[k] = {{channels{1'b0}} | {1'b1}}<<k;
+      end
+      else begin
+        assign encodings[k] = {channels{1'b0}};
+        
+      end
+   end
+   endgenerate
 
-  // assign the one-hot encodings to the ready signal, in a round robing fashion
-  ///this has to unroll to channels-1 amount regardless if the channels are used
-  ///@todo is there a way to do this in a neater way?
-  assign ready = (stream_tready)?
-  (valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ?   encodings[indexes[0]][channels_max-1:0] :
-  (valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? encodings[indexes[1]][channels_max-1:0] :
-  (valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? encodings[indexes[2]][channels_max-1:0] :
-  (valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? encodings[indexes[3]][channels_max-1:0] :
-  (valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? encodings[indexes[4]][channels_max-1:0] :
-  (valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? encodings[indexes[5]][channels_max-1:0] :
-  (valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? encodings[indexes[6]][channels_max-1:0] :
-  (valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? encodings[indexes[7]][channels_max-1:0] :
-  NONE_HOT : NONE_HOT;//continue for all channels_bits then last else is NONE_HOT;
-
-  /// with the same logic as the ready, we send the matching data
-  ///this has to unroll to channels-1 amount regardless if the channels are used
-  //@todo is there a way to do this in a neater way?
-  assign stream_tdata =
-(valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? submodule_data[indexes[0]][DATA_WIDTH-1:0] :
-(valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? submodule_data[indexes[1]][DATA_WIDTH-1:0] :
-(valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? submodule_data[indexes[2]][DATA_WIDTH-1:0] :
-(valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? submodule_data[indexes[3]][DATA_WIDTH-1:0] :
-(valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? submodule_data[indexes[4]][DATA_WIDTH-1:0] :
-(valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? submodule_data[indexes[5]][DATA_WIDTH-1:0] :
-(valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? submodule_data[indexes[6]][DATA_WIDTH-1:0] :
-(valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? submodule_data[indexes[7]][DATA_WIDTH-1:0] :
- 0; //continue for all channels_bits then last else is 0;
-
-  /// with the same logic as the ready, we choose which last to forward
-  ///this has to unroll to channels-1 amount regardless if the channels are used
-  //@todo is there a way to do this in a neater way?
-  assign stream_tlast =
-(valid[indexes[0][channels_bits-1:0]] || in_progress[indexes[0][channels_bits-1:0]]) ? last[indexes[0]] :
-(valid[indexes[1][channels_bits-1:0]] || in_progress[indexes[1][channels_bits-1:0]]) ? last[indexes[1][channels_bits-1:0]] :
-(valid[indexes[2][channels_bits-1:0]] || in_progress[indexes[2][channels_bits-1:0]]) ? last[indexes[2][channels_bits-1:0]] :
-(valid[indexes[3][channels_bits-1:0]] || in_progress[indexes[3][channels_bits-1:0]]) ? last[indexes[3][channels_bits-1:0]] :
-(valid[indexes[4][channels_bits-1:0]] || in_progress[indexes[4][channels_bits-1:0]]) ? last[indexes[4][channels_bits-1:0]] :
-(valid[indexes[5][channels_bits-1:0]] || in_progress[indexes[5][channels_bits-1:0]]) ? last[indexes[5][channels_bits-1:0]] :
-(valid[indexes[6][channels_bits-1:0]] || in_progress[indexes[6][channels_bits-1:0]]) ? last[indexes[6][channels_bits-1:0]] :
-(valid[indexes[7][channels_bits-1:0]] || in_progress[indexes[7][channels_bits-1:0]]) ? last[indexes[7][channels_bits-1:0]] :
- 0; //continue for all channels_bits then last else is 0;
-
-  //have the encoding maps always be refreshed in this always block
-  //helps separate somewhat static code with the actual logic
-  //*NOTE:* use the IDs to index the encodings.
+        assign submodule_data[0]=0;
+        assign submodule_in_progress[0]=0;
+        assign submodule_last[0]=0;
+        assign submodule_valid[0]=0;
+        //assign submodule_resets[0]=0;
+  //stateChanger!
+  integer i=0;
   always @(posedge clk) begin
-    encodings[AR_ID] <= AR_HOT;
-    encodings[AW_ID] <= AW_HOT;
-    encodings[R_ID]  <= R_HOT;
-    encodings[W_ID]  <= W_HOT;
-    encodings[B_ID]  <= B_HOT;
-    
-    //if there are unused encodings slots we set them to NONE_HOT
-    for (integer j = LAST_ID + 1; j < channels_max; j++) begin
-      encodings[j] <= NONE_HOT;
+    if (!resetn) begin
+    last_index<=0;
+    State<=0;  
     end
-  end
-  //starting from last_index and accept the first valid channel (meaning that
-  //this for should unroll in a cascading if-else for all the entries encoded by
-  //the channels bit.)
-  integer i;
-  always @(posedge clk) begin
-    if (resetn) begin
-      //we do 2^channels_bits iterations to check all the possible positions
-      //encoded by the channels_bits, so we can find the first valid channel by
-      //leveraging the overflow of last_index
-
-      // @todo check if increment of last_index wraps properly (unused entries
-      // encoded by the channels_bits should be skipped)
-
-      // *NOTE:* If the current channel is in progress, we should not change,
-      // and when we change we change directly to the next channel, to ensure
-      // fairness. As a side effect, if nothing is valid other than the current
-      // channel, we stay with that.
-      if (~in_progress[last_index]) begin
-        for (i = 0; i < channels_max; i++) begin
-          if (valid[last_index+1+i]) begin
-            if (i + 1 + last_index >= channels_max) begin
-              last_index <= i + 1 + last_index - channels_max;
-            end else begin
-              last_index <= i + 1 + last_index;
+    else begin
+      //if the state that we were in last is still performing a transaction and/or downstream is not ready then do not change states 
+      if (~submodule_in_progress[State])  begin
+        //check if any submodules have data pending
+        if(|submodule_valid)begin
+          //change state to the next submodule that has valid data waiting to be sent
+          for (i = 1; i <=channels; i++) begin 
+            //explicitly check to wrap around when checking who is the first valid submodule
+            if (submodule_valid[(State+i>channels) ? (State+i-channels):(State+i)])begin
+               //change the state when the first valid submodule is found
+               State<=(State+i>channels) ? (State+i-channels):(State+i);
+               break;
             end
-            break;
           end
         end
-      end else begin
-        last_index <= last_index;
+        //if no submodule ready, then switch to the NONE State
+        else begin
+          State<=0;
+        end
       end
-    end else begin
-      last_index <= 0;
+      //state is in progress. update something 
+      else begin
+        State<=State;
+      end
+    end
+  end
+  
+  reg tvalid;
+  assign stream_tvalid=tvalid&stream_tready;
+  //DATAMOVER!
+  int j;
+  //this block will handle AXISTREAM and Submodule Orchestration
+  always @(posedge clk) begin
+    if(!resetn)begin
+      Orchestrator_ready<=encodings[0];
+      stream_tdata<=0;
+      stream_tlast<=0;
+      tvalid<=0;
+    end
+    else begin
+      if(State!=0)begin
+        Orchestrator_ready<=encodings[State];                             
+        stream_tdata<=submodule_data[State];
+        stream_tlast<=submodule_last[State];
+        tvalid<=1;
+      end
+      else begin
+        Orchestrator_ready<=encodings[0];
+        stream_tdata<=0;
+        stream_tlast<=0;
+        tvalid<=0;
+      end
     end
   end
 

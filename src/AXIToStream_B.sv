@@ -33,6 +33,8 @@ module AXIToStream_B #(
     output wire                  last,
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
+
+    output wire [5:0] submodule_transaction_length,
     // AXI Slave (input wire) interface, will snoop a transaction
     output wire [  ID_WIDTH-1:0] AXIS_bid,
     output wire [           1:0] AXIS_bresp,
@@ -58,6 +60,7 @@ module AXIToStream_B #(
   // these transaction need only one clock cycle to be completed
   assign in_progress = 0;
   assign last = ready && valid;
+  assign submodule_transaction_length=1;
   // the output data is composed as follows
   assign data = {
     STREAM_TYPE, AXIM_bid, {DATA_WIDTH - STREAM_TYPE_WIDTH - ID_WIDTH - 2{1'b0}}, AXIM_bresp

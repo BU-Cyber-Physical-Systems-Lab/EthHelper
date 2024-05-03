@@ -38,6 +38,8 @@ module Dummy_AXIToStream_B # (
     // high when this submodule is streaming data (to block the other submodules from streaming data at the same time)
     output wire                  in_progress,
     output wire                  last,
+
+    output wire [5:0] submodule_transaction_length,
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
     // AXI master (output wire) Interface, will forward the AXIS transaction to destination
@@ -58,6 +60,8 @@ assign data =0;
 assign valid=0;
 assign in_progress=0;
 assign last=0;
+assign submodule_transaction_length=1;
+
 assign AXIS_bid = AXIM_bid;
 assign AXIS_bresp = AXIM_bresp;
 assign AXIS_buser = AXIM_buser;
