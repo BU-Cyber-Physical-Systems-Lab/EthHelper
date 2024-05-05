@@ -13,6 +13,7 @@ module AXIToStream_orchestrator_Reg #(
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
     parameter DEST_WIDTH = 32,
+    localparam TIMER_WIDTH=DATA_WIDTH-ADDR_WIDTH-ID_WIDTH-BURST_LEN-channels_bits,
     // how many channels this module supports
     parameter channels = 6,
     //the bit needed to represent this channels in binary
@@ -144,7 +145,8 @@ module AXIToStream_orchestrator_Reg #(
       .LOCK_WIDTH(LOCK_WIDTH),
       .USER_WIDTH(USER_WIDTH),
       .STREAM_TYPE_WIDTH(channels_bits),
-      .STREAM_TYPE(AR_ID)
+      .STREAM_TYPE(AR_ID),
+      .TIMER_WIDTH(TIMER_WIDTH)
   ) AR (
       .clk(clk),
       .resetn(resets[AR_ID]),
@@ -154,6 +156,7 @@ module AXIToStream_orchestrator_Reg #(
       .in_progress(submodule_in_progress[AR_ID]),
       .last(submodule_last[AR_ID]),
       .submodule_transaction_length(submodule_transaction_length[AR_ID]),
+      .timestamp(timestamp),
 
       //subordinate
       .AXIS_axid(AXIS_arid),
@@ -194,7 +197,8 @@ module AXIToStream_orchestrator_Reg #(
       .LOCK_WIDTH(LOCK_WIDTH),
       .USER_WIDTH(USER_WIDTH),
       .STREAM_TYPE_WIDTH(channels_bits),
-      .STREAM_TYPE(AW_ID)
+      .STREAM_TYPE(AW_ID),
+      .TIMER_WIDTH(TIMER_WIDTH)
   ) AW (
       .clk(clk),
       .resetn(resets[AW_ID]),
@@ -204,6 +208,7 @@ module AXIToStream_orchestrator_Reg #(
       .in_progress(submodule_in_progress[AW_ID]),
       .last(submodule_last[AW_ID]),
       .submodule_transaction_length(submodule_transaction_length[AW_ID]),
+      .timestamp(timestamp),
 
       //subordinate
       .AXIS_axid(AXIS_awid),
@@ -335,6 +340,7 @@ module AXIToStream_orchestrator_Reg #(
       .AXIS_wready(AXIS_wready)
   );
   reg [channels_bits:0] State;//interpret this as last
+  reg [TIMER_WIDTH-1:0] timestamp;
 
   //AXI stream wirings
   assign stream_tid   = 0;
@@ -402,7 +408,8 @@ module AXIToStream_orchestrator_Reg #(
   always @(posedge clk) begin
     if (!resetn) begin
     //last_index<=0;
-    State<=0;  
+    State<=0;
+    timestamp<=0;
     end
     else begin
       //if the state that we were in last is still performing a transaction and/or downstream is not ready then do not change states 
@@ -428,7 +435,9 @@ module AXIToStream_orchestrator_Reg #(
       else begin
         State<=State;
       end
+      timestamp<=timestamp+1;
     end
+
   end
   
   

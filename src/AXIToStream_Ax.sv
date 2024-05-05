@@ -18,7 +18,8 @@ module AXIToStream_Ax #(
     parameter LOCK_WIDTH = 2,
     parameter USER_WIDTH = 64,
     parameter STREAM_TYPE = 3'b0,
-    parameter STREAM_TYPE_WIDTH = 3
+    parameter STREAM_TYPE_WIDTH = 3,
+    parameter TIMER_WIDTH=20
 ) (
     //module inputs pins
     //unused input, but it is necessary to keep the same interface as the other modules
@@ -36,8 +37,10 @@ module AXIToStream_Ax #(
     output wire                  last,
     // the data to be streamed
     output wire [DATA_WIDTH-1:0] data,
-
+    //how long the transaction to the orchestrator is
     output wire [5:0] submodule_transaction_length,
+
+    input wire [TIMER_WIDTH-1:0] timestamp,
 
     // AXI Slave (input wire) interface, will snoop a transaction
     input  wire [  ID_WIDTH-1:0] AXIS_axid,
@@ -92,13 +95,20 @@ module AXIToStream_Ax #(
   assign submodule_transaction_length=1;
 
 
-  // the output data is composed as follows
+  //the output data is composed as follows
   assign data = {
     STREAM_TYPE,
     AXIS_axid,
     AXIS_axlen,
-    {DATA_WIDTH - STREAM_TYPE_WIDTH - ID_WIDTH - BURST_LEN - ADDR_WIDTH{1'b0}},
+    timestamp,
     AXIS_axaddr
   };
+
+  
+  // assign data[ADDR_WIDTH-1:0]=AXIS_axaddr;
+  // assign data[ADDR_WIDTH+BURST_LEN-1:ADDR_WIDTH]=AXIS_axlen;
+  // assign data[ADDR_WIDTH+BURST_LEN+ID_WIDTH-1:ADDR_WIDTH+BURST_LEN]=AXIS_axid;
+  // assign data[ADDR_WIDTH+BURST_LEN+ID_WIDTH+STREAM_TYPE_WIDTH-1:ADDR_WIDTH+BURST_LEN+ID_WIDTH]=STREAM_TYPE;
+  // assign data[DATA_WIDTH-1:ADDR_WIDTH+BURST_LEN+ID_WIDTH+STREAM_TYPE_WIDTH]=timestamp;
   
 endmodule
