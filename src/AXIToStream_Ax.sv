@@ -103,8 +103,6 @@ module AXIToStream_Ax #(
     timestamp,
     AXIS_axaddr
   };
-
-  
   // assign data[ADDR_WIDTH-1:0]=AXIS_axaddr;
   // assign data[ADDR_WIDTH+BURST_LEN-1:ADDR_WIDTH]=AXIS_axlen;
   // assign data[ADDR_WIDTH+BURST_LEN+ID_WIDTH-1:ADDR_WIDTH+BURST_LEN]=AXIS_axid;
