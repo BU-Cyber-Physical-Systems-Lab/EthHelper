@@ -18,7 +18,7 @@
 // Additional Comments:
 // 
 //////////////////////////////////////////////////////////////////////////////////
-
+//todo use ILA advanced trigger to count the amount of packets
 
 module FrameFormerManager # (
     parameter integer OUTPUT_WIDTH = 64
@@ -57,18 +57,23 @@ module FrameFormerManager # (
     
     
     assign FFMState=state;    
-    assign FFMready=state>1 && state<Packet_Size && M_AXIS_tready;
+    assign FFMready = (state>1 && state<Packet_Size) && M_AXIS_tready;
     
+    //reg delayedFFMready;
+
+    //reg [OUTPUT_WIDTH-1:0] store;
     
     function void init();
         state<=0;
         M_AXIS_tlast<=0;
         M_AXIS_tvalid<=0;
+        //delayedFFMready<=0;
     endfunction
     
     function void DataInit();
         M_AXIS_tdata<=0;
-        M_AXIS_tkeep<=0; 
+        M_AXIS_tkeep<=0;
+        //store<=0; 
         //FFMready<=0;
         //Input_Data<=0;
     endfunction
@@ -101,13 +106,15 @@ module FrameFormerManager # (
         end
         else//else
             state <= state;
+
+        //delayedFFMready<=FFMready;
    end
    
    always @ (posedge ACLK) begin
         if(!ARESETN)begin
             DataInit();
         end
-        else if(M_AXIS_tready)begin
+        else if(M_AXIS_tready || state==0)begin
             if(state==Packet_Size)begin 
                 M_AXIS_tdata <= 64'h5704;
                 M_AXIS_tkeep <= 8'h07;
@@ -131,6 +138,9 @@ module FrameFormerManager # (
             else if (state>1 & state<Packet_Size)begin
                 //if recieved packet and subordinate is ready to accept incriment
                 //assuming that the queue in the subordinate will always contain an array of 0 no matter the amount of shifts
+                
+                //todo some catching system to catch an ongoing transfer when downstream is just recently paused
+
                 M_AXIS_tdata <= Input_Data;
                 M_AXIS_tkeep <= 8'hFF;
 
@@ -138,8 +148,10 @@ module FrameFormerManager # (
 
         end
         else begin
+            //store<=Input_Data;
             M_AXIS_tdata <= M_AXIS_tdata;// latching possible
             
         end
+        //FFMready <= (state>1 && state<Packet_Size) && M_AXIS_tready && !FFMready;//this last part is a bandaid to the problem that is caused by making FFMready a register
     end
 endmodule

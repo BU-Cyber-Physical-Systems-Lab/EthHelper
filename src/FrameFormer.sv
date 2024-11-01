@@ -56,7 +56,8 @@ module FrameFormer # (
     output wire FFSisFull,
     output wire FFSisEmpty,
     output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
-    output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer
+    output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer,
+    output wire [INPUT_WIDTH-1:0] FFSFFM_delayed_Transfer
     );
     
 
@@ -65,11 +66,14 @@ module FrameFormer # (
     wire Input_Buffer_Full;
     wire Input_Buffer_Empty;
     wire [63:0] Data_Transfer;
+    wire [63:0] Delayed_Data_Transfer;
     
+
     assign FFMisReady = Framer_Ready;
     assign FFSisFull = Input_Buffer_Full;    
     assign FFSisEmpty = Input_Buffer_Empty;
     assign FFSFFM_Data_Transfer = Data_Transfer;
+    assign FFSFFM_delayed_Transfer = Delayed_Data_Transfer;
     
     FrameFormerSubordinate # (
     .INPUT_WIDTH(INPUT_WIDTH),
@@ -88,7 +92,8 @@ module FrameFormer # (
         .full(Input_Buffer_Full),
         .tempOut(Data_Transfer),
         .FramerTready(M_AXIS_tready),
-        .FFSTail(FFSTail)
+        .FFSTail(FFSTail),
+        .Delayed_Data_Transfer(Delayed_Data_Transfer)
     );
     
     FrameFormerManager #(

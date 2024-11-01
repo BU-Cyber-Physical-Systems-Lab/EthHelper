@@ -70,7 +70,8 @@ module FrameFormer_wrapper #(
     output wire FFSisFull,
     output wire FFSisEmpty,
     output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
-    output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer
+    output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer,
+    output wire [INPUT_WIDTH-1:0] FFSFFM_delayed_Transfer
     );
     
     FrameFormer #(
@@ -100,7 +101,8 @@ module FrameFormer_wrapper #(
         .FFMState(FFMState),
         .FFSisFull(FFSisFull),
         .FFSisEmpty(FFSisEmpty),
-        .FFMisReady(FFMisReady)
+        .FFMisReady(FFMisReady),
+        .FFSFFM_delayed_Transfer(FFSFFM_delayed_Transfer)
     );
     
 endmodule
