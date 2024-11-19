@@ -1,0 +1,3 @@
+[submodule "VivadoTools"]
+	path = VivadoTools
+	url = https://github.com/BU-Cyber-Physical-Systems-Lab/VivadoTools.git
