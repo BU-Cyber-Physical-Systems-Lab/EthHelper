@@ -41,7 +41,8 @@ module FrameFormerSubordinate # (
     output wire [OUTPUT_WIDTH-1:0] Delayed_Data_Transfer,
     
     //for debug
-    output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail
+    output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
+    output reg counterPulseOut
     );
     
 
@@ -78,6 +79,8 @@ module FrameFormerSubordinate # (
     
     assign tempOut=tempReg[0];
 
+    
+
     function void shiftandOutput();
         for (i=0; i<MAX_INTERNAL_SPACE; i++)begin
             if (i==MAX_INTERNAL_SPACE-1) begin
@@ -88,6 +91,7 @@ module FrameFormerSubordinate # (
                 tempReg[i]=tempReg[i+1];
             end
         end
+        sendPuleseOut();
     endfunction
 
     function void shiftOutputInsert();
@@ -103,6 +107,7 @@ module FrameFormerSubordinate # (
               tempReg[i]<=tempReg[i+1];
             end
         end
+        sendPuleseOut();
     endfunction
 
 //tail <= tail + (InputCondition ? 1 : 0) - (OutputCondition & tail!=0 ? 1 : 0);
@@ -118,6 +123,7 @@ module FrameFormerSubordinate # (
                 tempReg[i]<={((OUTPUT_WIDTH)){1'b0}};
             end
             delayedOut<=0;
+            counterPulseOut<=0;
 
         end
         else begin
@@ -131,6 +137,7 @@ module FrameFormerSubordinate # (
                 if (tail!=0)
                     tail<=tail-1;
                 delayedOut<=tempOut;
+                counterPulseOut<=1;
             end
             else if(OutputCondition & InputCondition)begin
                 shiftOutputInsert();
@@ -139,11 +146,14 @@ module FrameFormerSubordinate # (
                 else
                     tail<=tail;
                 delayedOut<=tempOut;
+                counterPulseOut<=1;
             end
             else begin
                 for(i=0;i<MAX_INTERNAL_SPACE;i=i+1)begin //make every register 0 to avoid a floating register
                     tempReg[i]<=tempReg[i];
                 end
+                delayedOut<=tempOut;
+                counterPulseOut<=0;
             end
         end 
         
