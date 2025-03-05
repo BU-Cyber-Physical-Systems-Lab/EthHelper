@@ -72,7 +72,8 @@ module FrameFormer_wrapper #(
     output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
     output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer,
     output wire [INPUT_WIDTH-1:0] FFSFFM_delayed_Transfer,
-    output wire [1:0] counterPulseOut
+    output wire counterPulseOutFFS,
+    output wire counterPulseOutFFM
     );
     
     FrameFormer #(
@@ -104,7 +105,8 @@ module FrameFormer_wrapper #(
         .FFSisEmpty(FFSisEmpty),
         .FFMisReady(FFMisReady),
         .FFSFFM_delayed_Transfer(FFSFFM_delayed_Transfer),
-        .counterPulseOut(counterPulseOut)
+        .counterPulseOutFFS(counterPulseOutFFS),
+        .counterPulseOutFFM(counterPulseOutFFM)
     );
     
 endmodule

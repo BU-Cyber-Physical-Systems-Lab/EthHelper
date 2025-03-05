@@ -48,10 +48,12 @@ module FrameFormerManager # (
     
     //wires for debugging
     output wire [13:0] FFMState,
-    output reg counterPulseOut
+    output wire counterPulseOut
     );
     
 
+    reg counterPulseOutReg;
+    assign counterPulseOut=counterPulseOutReg;
     
     reg[13:0] state;
     
@@ -114,13 +116,13 @@ module FrameFormerManager # (
    always @ (posedge ACLK) begin
         if(!ARESETN)begin
             DataInit();
-            counterPulseOut<=0;
+            counterPulseOutReg<=0;
         end
         else if(M_AXIS_tready || state==0)begin
             if(state==Packet_Size)begin 
                 M_AXIS_tdata <= 64'h5704;
                 M_AXIS_tkeep <= 8'h07;
-                counterPulseOut<=0;
+                counterPulseOutReg<=0;
                 //is_ready<=0;
             end            
             else if (state==0 || state>Packet_Size)begin
@@ -128,7 +130,7 @@ module FrameFormerManager # (
                 M_AXIS_tdata[63:48] <= Source_Address[15:0];
                 M_AXIS_tdata[47:0] <= Destination_Address;
                 M_AXIS_tkeep <= 8'hFF;
-                counterPulseOut<=0;
+                counterPulseOutReg<=0;
                 //is_ready<=0;
                 end
             else if (state==1)begin
@@ -137,7 +139,7 @@ module FrameFormerManager # (
                 M_AXIS_tdata[47:32] <= Link_Type;
                 M_AXIS_tdata[31:0] <= Source_Address[47:16];
                 M_AXIS_tkeep <= 8'hFF;
-                counterPulseOut<=0;
+                counterPulseOutReg<=0;
                 //is_ready<=1;//set ready to prepare data for the next cycle
                 end
             else if (state>1 & state<Packet_Size)begin
@@ -148,7 +150,11 @@ module FrameFormerManager # (
 
                 M_AXIS_tdata <= Input_Data;
                 M_AXIS_tkeep <= 8'hFF;
-                counterPulseOut<=1;
+                
+                // if(Input_Data!=64'h0000000000000000)begin
+                //     counterPulseOutReg<=1;
+                // end
+                counterPulseOutReg<=1;
 
             end
 
@@ -156,7 +162,7 @@ module FrameFormerManager # (
         else begin
             //store<=Input_Data;
             M_AXIS_tdata <= M_AXIS_tdata;// latching possible
-            counterPulseOut<=0;
+            counterPulseOutReg<=0;
             
         end
         //FFMready <= (state>1 && state<Packet_Size) && M_AXIS_tready && !FFMready;//this last part is a bandaid to the problem that is caused by making FFMready a register

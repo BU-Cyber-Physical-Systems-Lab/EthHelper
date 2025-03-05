@@ -42,12 +42,13 @@ module FrameFormerSubordinate # (
     
     //for debug
     output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
-    output reg counterPulseOut
+    output wire counterPulseOut
     );
     
 
     
-
+    reg counterPulseOutReg;
+    assign counterPulseOut = counterPulseOutReg; 
     
     //make register to buffer in case of slower downstream
     reg [INPUT_WIDTH-1:0] tempReg [MAX_INTERNAL_SPACE-1:0];
@@ -91,7 +92,6 @@ module FrameFormerSubordinate # (
                 tempReg[i]=tempReg[i+1];
             end
         end
-        sendPuleseOut();
     endfunction
 
     function void shiftOutputInsert();
@@ -107,7 +107,6 @@ module FrameFormerSubordinate # (
               tempReg[i]<=tempReg[i+1];
             end
         end
-        sendPuleseOut();
     endfunction
 
 //tail <= tail + (InputCondition ? 1 : 0) - (OutputCondition & tail!=0 ? 1 : 0);
@@ -123,7 +122,7 @@ module FrameFormerSubordinate # (
                 tempReg[i]<={((OUTPUT_WIDTH)){1'b0}};
             end
             delayedOut<=0;
-            counterPulseOut<=0;
+            counterPulseOutReg<=0;
 
         end
         else begin
@@ -131,13 +130,17 @@ module FrameFormerSubordinate # (
             if(InputCondition & !OutputCondition)begin
                 tempReg[tail]<=S_AXIS_tdata;
                 tail<=tail+1;
+                counterPulseOutReg<=0;
             end
             else if(OutputCondition & !InputCondition)begin
                 shiftandOutput();
                 if (tail!=0)
                     tail<=tail-1;
                 delayedOut<=tempOut;
-                counterPulseOut<=1;
+//                if(tempOut!=64'h0000000000000000)begin
+//                    counterPulseOutReg<=1;
+//                end
+                  counterPulseOutReg<=1;               
             end
             else if(OutputCondition & InputCondition)begin
                 shiftOutputInsert();
@@ -146,14 +149,17 @@ module FrameFormerSubordinate # (
                 else
                     tail<=tail;
                 delayedOut<=tempOut;
-                counterPulseOut<=1;
+//                if(tempOut!=64'h0000000000000000)begin
+//                    counterPulseOutReg<=1;
+//                end
+                  counterPulseOutReg<=1;
             end
             else begin
                 for(i=0;i<MAX_INTERNAL_SPACE;i=i+1)begin //make every register 0 to avoid a floating register
                     tempReg[i]<=tempReg[i];
                 end
                 delayedOut<=tempOut;
-                counterPulseOut<=0;
+                counterPulseOutReg<=0;
             end
         end 
         

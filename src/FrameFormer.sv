@@ -58,7 +58,8 @@ module FrameFormer # (
     output wire [$clog2(MAX_INTERNAL_SPACE):0] FFSTail,
     output wire [INPUT_WIDTH-1:0] FFSFFM_Data_Transfer,
     output wire [INPUT_WIDTH-1:0] FFSFFM_delayed_Transfer,
-    output wire [1:0] counterPulseOut
+    output wire counterPulseOutFFS,
+    output wire counterPulseOutFFM
     );
     
 
@@ -95,7 +96,7 @@ module FrameFormer # (
         .FramerTready(M_AXIS_tready),
         .FFSTail(FFSTail),
         .Delayed_Data_Transfer(Delayed_Data_Transfer),
-        .counterPulseOut(counterPulseOut[0])
+        .counterPulseOut(counterPulseOutFFS)
     );
     
     FrameFormerManager #(
@@ -118,7 +119,7 @@ module FrameFormer # (
         .SyncWord(SyncWord),
         .Input_Data(Data_Transfer),
         .FFMState(FFMState),
-        .counterPulseOut(counterPulseOut[1])
+        .counterPulseOut(counterPulseOutFFM)
     );
     
     
