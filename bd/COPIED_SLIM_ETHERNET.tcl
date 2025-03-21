@@ -2036,7 +2036,14 @@ proc create_root_design { parentCell } {
   set axis_dwidth_converter_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axis_dwidth_converter:1.1 axis_dwidth_converter_1 ]
   set_property -dict [ list \
    CONFIG.HAS_ACLKEN {0} \
+   CONFIG.HAS_TKEEP {1} \
+   CONFIG.HAS_TLAST {1} \
+   CONFIG.HAS_TSTRB {1} \
    CONFIG.M_TDATA_NUM_BYTES {8} \
+   CONFIG.S_TDATA_NUM_BYTES {16} \
+   CONFIG.TDEST_WIDTH {32} \
+   CONFIG.TID_WIDTH {4} \
+   CONFIG.TUSER_BITS_PER_BYTE {4} \
  ] $axis_dwidth_converter_1
 
   # Create instance: axis_interconnect_0, and set properties
@@ -2296,7 +2303,6 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets zups_M00_AXI1] [get_bd_intf_pins
   # Restore current instance
   current_bd_instance $oldCurInst
 
-  validate_bd_design
   save_bd_design
 }
 # End of create_root_design()
@@ -2308,4 +2314,6 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets zups_M00_AXI1] [get_bd_intf_pins
 
 create_root_design ""
 
+
+common::send_msg_id "BD_TCL-1000" "WARNING" "This Tcl script was generated from a block design that has not been validated. It is possible that design <$design_name> may result in errors during validation."
 
