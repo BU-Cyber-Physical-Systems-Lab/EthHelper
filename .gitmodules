@@ -1,3 +1,6 @@
 [submodule "VivadoTools"]
 	path = VivadoTools
 	url = https://github.com/BU-Cyber-Physical-Systems-Lab/VivadoTools.git
+[submodule "hw_amba_traffic_logger"]
+	path = hw_amba_traffic_logger
+	url = git@github.com:BU-Cyber-Physical-Systems-Lab/hw_amba_traffic_logger
