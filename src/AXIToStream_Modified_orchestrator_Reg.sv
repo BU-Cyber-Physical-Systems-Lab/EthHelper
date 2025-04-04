@@ -403,17 +403,65 @@ module AXIToStream_orchestrator_Reg #(
         //assign submodule_resets[0]=0;
 
   reg [5:0] transaction_length;
+ 
   //stateChanger!
   integer i=0;
+//  always @(posedge clk) begin
+//    if (!resetn) begin
+//    //last_index<=0;
+//    State<=0;
+//    timestamp<=0;
+//    end
+//    else begin
+//      //if the state that we were in last is still performing a transaction and/or downstream is not ready then do not change states 
+//      if (~submodule_in_progress[State] & transaction_length==0)  begin
+//        //check if any submodules have data pending
+//        if(|submodule_valid)begin
+//          //change state to the next submodule that has valid data waiting to be sent
+//          for (i = 1; i <=channels; i++) begin 
+//            //explicitly check to wrap around when checking who is the first valid submodule
+//            if (submodule_valid[(State+i>channels) ? (State+i-channels):(State+i)])begin
+//               //change the state when the first valid submodule is found
+//               State<=(State+i>channels) ? (State+i-channels):(State+i);
+//               break;
+//            end
+//          end
+//        end
+//        //if no submodule ready, then switch to the NONE State
+//        // else begin
+//        //   State<=0;
+//        // end
+//      end
+//      //state is in progress. update something 
+//      else begin
+//        State<=State;
+//      end
+//      timestamp<=timestamp+1;
+//    end
+
+//  end
+  
+  reg [channels_bits:0] NextState;
+  
   always @(posedge clk) begin
     if (!resetn) begin
     //last_index<=0;
     State<=0;
     timestamp<=0;
+    
     end
     else begin
-      //if the state that we were in last is still performing a transaction and/or downstream is not ready then do not change states 
-      if (~submodule_in_progress[State] & transaction_length==0)  begin
+      State<=NextState;
+      timestamp<=timestamp+1;
+    end
+
+  end
+  
+  always @* begin 
+  if (!resetn) begin
+  NextState<=0;
+  end
+  if (~submodule_in_progress[State] & transaction_length==0)  begin
         //check if any submodules have data pending
         if(|submodule_valid)begin
           //change state to the next submodule that has valid data waiting to be sent
@@ -421,25 +469,13 @@ module AXIToStream_orchestrator_Reg #(
             //explicitly check to wrap around when checking who is the first valid submodule
             if (submodule_valid[(State+i>channels) ? (State+i-channels):(State+i)])begin
                //change the state when the first valid submodule is found
-               State<=(State+i>channels) ? (State+i-channels):(State+i);
+               NextState<=(State+i>channels) ? (State+i-channels):(State+i);
                break;
             end
           end
         end
-        //if no submodule ready, then switch to the NONE State
-        else begin
-          State<=0;
-        end
-      end
-      //state is in progress. update something 
-      else begin
-        State<=State;
-      end
-      timestamp<=timestamp+1;
-    end
-
   end
-  
+  end
   
   reg started;
   //DATAMOVER!
