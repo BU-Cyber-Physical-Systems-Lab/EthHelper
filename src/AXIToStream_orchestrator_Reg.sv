@@ -427,9 +427,9 @@ module AXIToStream_orchestrator_Reg #(
           end
         end
         //if no submodule ready, then switch to the NONE State
-        else begin
-          State<=0;
-        end
+        // else begin
+        //   State<=0;
+        // end
       end
       //state is in progress. update something 
       else begin
