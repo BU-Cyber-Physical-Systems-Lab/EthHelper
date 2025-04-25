@@ -53,6 +53,8 @@ module FrameFormer_Delay # (
 
     //backpressure related
     input wire [$clog2(MAX_INTERNAL_SPACE):0] Delay,
+    input wire [8:0] TimerInit,
+    input wire [8:0] GapInit,
     
     //debug wires
     output wire FFMisReady,
@@ -99,6 +101,9 @@ module FrameFormer_Delay # (
         .S_AXIS_tvalid(Delay_valid),
         .M_AXIS_tready(M_AXIS_tready),
         .FFSTail(FFSTail),
+
+        .GapInit(GapInit),
+        .TimerInit(TimerInit),
         //outputs
         .M_AXIS_tvalid(M_AXIS_tvalid),
         .S_AXIS_tready(Delay_ready)

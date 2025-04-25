@@ -66,6 +66,8 @@ module FrameFormer_Delay_wrapper #(
 
     //backpressure related
     input wire [$clog2(MAX_INTERNAL_SPACE):0] Delay,
+    input wire [8:0] TimerInit,
+    input wire [8:0] GapInit,
     
     //debug wires
     output wire FFMisReady,
@@ -102,6 +104,8 @@ module FrameFormer_Delay_wrapper #(
         .SyncWord(SyncWord),
         .Packet_Size(Packet_Size),
         .Delay(Delay),
+        .GapInit(GapInit),
+        .TimerInit(TimerInit),
         .FFSTail(FFSTail),
         .FFSFFM_Data_Transfer(FFSFFM_Data_Transfer),
         .FFMState(FFMState),
